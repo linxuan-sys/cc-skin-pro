@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+  <defs>
+    <radialGradient id="bgP" cx="50%" cy="40%" r="65%">
+      <stop offset="0" stop-color="#6d28d9" stop-opacity=".55"/>
+      <stop offset="45%" stop-color="#3b0764" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#07050e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bgB" cx="84%" cy="82%" r="58%">
+      <stop offset="0" stop-color="#1d4ed8" stop-opacity=".38"/>
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bgV" cx="12%" cy="90%" r="45%">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx="50%" cy="48%" r="72%">
+      <stop offset="0" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity=".12"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity=".78"/>
+    </radialGradient>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f5f3ff"/>
+      <stop offset=".55" stop-color="#e9d5ff"/>
+      <stop offset="1" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset=".55" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#a78bfa" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="streak" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a78bfa" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#c4b5fd" stop-opacity=".10"/>
+      <stop offset="1" stop-color="#60a5fa" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="#8b5cf6" stroke-opacity=".075" stroke-width="1"/>
+    </pattern>
+    <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="1" fill="#000000" opacity=".22"/>
+    </pattern>
+    <filter id="glow" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur stdDeviation="24" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="blurOnly" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="noise" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <rect width="2560" height="1440" fill="#07050e"/>
+  <rect width="2560" height="1440" fill="url(#bgP)"/>
+  <rect width="2560" height="1440" fill="url(#bgB)"/>
+  <rect width="2560" height="1440" fill="url(#bgV)"/>
+  <rect width="2560" height="1440" fill="url(#grid)"/>
+
+  <polygon points="-260,1340 260,-120 620,-120 -40,1400" fill="url(#streak)"/>
+  <polygon points="1960,-80 2300,-80 1500,1460 1160,1460" fill="url(#streak)" opacity=".6"/>
+
+  <g fill="none" stroke="url(#accentGrad)">
+    <circle cx="1280" cy="640" r="520" stroke-opacity=".16" stroke-dasharray="2 16"/>
+    <circle cx="1280" cy="640" r="660" stroke-opacity=".12" stroke-dasharray="130 280"/>
+    <circle cx="1280" cy="640" r="800" stroke-opacity=".08" stroke-dasharray="1 22"/>
+    <circle cx="2110" cy="400" r="250" stroke-opacity=".14" stroke-dasharray="90 26"/>
+    <circle cx="420" cy="1140" r="230" stroke-opacity=".12" stroke-dasharray="2 14"/>
+    <circle cx="2110" cy="400" r="330" stroke-opacity=".07" stroke-dasharray="1 20"/>
+  </g>
+
+  <g stroke="#a78bfa" stroke-width="2" fill="none" opacity=".45">
+    <path d="M80 160 V80 H160"/>
+    <path d="M2480 80 H2400 V160"/>
+    <path d="M80 1280 V1360 H160"/>
+    <path d="M2480 1360 H2400 V1280"/>
+  </g>
+
+  <g stroke="#8b5cf6" stroke-width="1.5" opacity=".4">
+    <path d="M300 300 h26 M313 287 v26"/>
+    <path d="M2260 300 h26 M2273 287 v26"/>
+    <path d="M360 1160 h26 M373 1147 v26"/>
+    <path d="M2200 1120 h26 M2213 1107 v26"/>
+  </g>
+
+  <g fill="#c4b5fd">
+    <circle cx="240" cy="520" r="2.5" opacity=".5"/>
+    <circle cx="2320" cy="620" r="2" opacity=".45"/>
+    <circle cx="980" cy="1180" r="2" opacity=".5"/>
+    <circle cx="1620" cy="240" r="2" opacity=".4"/>
+    <circle cx="2060" cy="980" r="2.5" opacity=".35"/>
+    <circle cx="520" cy="880" r="1.8" opacity=".45"/>
+  </g>
+
+  <text x="1280" y="740" text-anchor="middle" font-family="JetBrainsMono NF" font-size="300" font-weight="800" letter-spacing="14" fill="#8b5cf6" opacity=".65" filter="url(#blurOnly)">CC SKIN PRO</text>
+  <text x="1280" y="740" text-anchor="middle" font-family="JetBrainsMono NF" font-size="300" font-weight="800" letter-spacing="14">
+    <tspan fill="#a78bfa">CC</tspan><tspan fill="url(#titleGrad)"> SKIN PRO</tspan>
+  </text>
+
+  <rect x="430" y="815" width="760" height="2" fill="url(#lineGrad)"/>
+  <rect x="1370" y="815" width="760" height="2" fill="url(#lineGrad)"/>
+  <path d="M1280 806 l9 9 -9 9 -9 -9 z" fill="#a78bfa" opacity=".95"/>
+
+  <text x="1280" y="905" text-anchor="middle" font-family="JetBrainsMono NF" font-size="44" font-weight="500" letter-spacing="12" fill="#c4b5fd" opacity=".92">CLAUDE CODE'S ALL-IN-ONE SKIN SUITE</text>
+
+  <g transform="translate(1280 990)">
+    <rect x="-290" y="-3" width="120" height="6" rx="3" fill="#cba6f7" opacity=".9"/>
+    <rect x="-160" y="-3" width="90" height="6" rx="3" fill="#89b4fa" opacity=".85"/>
+    <rect x="-60" y="-3" width="70" height="6" rx="3" fill="#94e2d5" opacity=".8"/>
+    <rect x="20" y="-3" width="110" height="6" rx="3" fill="#a6e3a1" opacity=".75"/>
+    <rect x="140" y="-3" width="60" height="6" rx="3" fill="#f9e2af" opacity=".7"/>
+    <rect x="210" y="-3" width="80" height="6" rx="3" fill="#fab387" opacity=".65"/>
+  </g>
+
+  <rect x="0" y="1240" width="2560" height="1" fill="url(#lineGrad)" opacity=".35"/>
+  <ellipse cx="1280" cy="1240" rx="420" ry="60" fill="#7c3aed" opacity=".10" filter="url(#glow)"/>
+
+  <rect width="2560" height="1440" fill="url(#scan)" opacity=".3"/>
+  <rect width="2560" height="1440" fill="url(#vig)"/>
+  <rect width="2560" height="1440" filter="url(#noise)" opacity=".05"/>
+</svg>
