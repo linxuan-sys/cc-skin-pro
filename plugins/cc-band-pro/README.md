@@ -1,4 +1,4 @@
-# mocha-bar
+# cc-band-pro
 
 cc-skin-pro's powerline bar, and nothing else, locked to Catppuccin Mocha. No
 themes, no picker, no settings: one band above the prompt, six blocks, each a
@@ -12,7 +12,7 @@ click away from the plugin that owns its pane.
 | --- | --- | --- |
 | Thinking | The Claude glyph — or the crab's picture, on a terminal with the image protocol: at its laptop while Claude works, resting otherwise — with a spinner and a pink pulse while a turn runs | Opens the After queue pane (the `after` plugin) |
 | Model | The model's name (its `modelPicker` label where the settings give one) and the effort | Runs `/find-model` |
-| Diff | How many Edit, MultiEdit and Write calls the last turn made | Opens mocha-bar's own Diff pane: step through each edit, `p`/`n`, Esc closes |
+| Diff | How many Edit, MultiEdit and Write calls the last turn made | Opens cc-band-pro's own Diff pane: step through each edit, `p`/`n`, Esc closes |
 | Tree | `tree` | Runs `/filetree` |
 | Marks | A bookmark icon | Opens the Bookmarks pane (the `transcript-bookmarks` plugin) |
 | Usage | The context meter and tokens; green to 30 %, yellow to 60 %, orange to 80 %, red past it | Runs `/ctx` |
@@ -21,7 +21,7 @@ click away from the plugin that owns its pane.
 
 - **A Nerd Font** in the terminal, for the powerline caps and the icons.
 - **find-model**, **filetree**, **session-meter**, **after** and **transcript-bookmarks**,
-  for the model, tree, usage, thinking and marks blocks. mocha-bar only opens their panes, so each
+  for the model, tree, usage, thinking and marks blocks. cc-band-pro only opens their panes, so each
   stays in, and is kept up in, its own plugin. A block whose plugin is off says
   so in a toast.
 - The crab's two pictures ship in `assets/`; a terminal with the image protocol
@@ -30,7 +30,7 @@ click away from the plugin that owns its pane.
 
 ## How it lives with the other bands
 
-The prompt has one band slot, shared by every plugin that draws there. mocha-bar
+The prompt has one band slot, shared by every plugin that draws there. cc-band-pro
 draws its bar and keeps whatever the plugins beneath it draw (`next(e)`), so the
 skins mod's usage band and the rest stay where they were.
 
@@ -42,7 +42,7 @@ skins mod's usage band and the rest stay where they were.
 ## Clicks while Claude works
 
 Every pane opens at once, mid-turn or not, and no press leaves a line in the
-conversation. The Diff pane is mocha-bar's own. The other three are opened by
+conversation. The Diff pane is cc-band-pro's own. The other three are opened by
 their ids, which works because each plugin keeps the state its pane draws from:
 session-meter's reading comes from `session.measure`, find-model reads its list
 in as a session starts, and filetree keeps its tree following the cwd. When a

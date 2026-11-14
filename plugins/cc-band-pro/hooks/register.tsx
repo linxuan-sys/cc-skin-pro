@@ -8,11 +8,11 @@ import { DIFF_PANE, diffLines, drawDiff, isEditTool } from './diff'
 
 const NO_USAGE: Usage = { model: null, contextPercent: null, contextTokens: null }
 
-const frameAtom = atom({ plugin: 'mocha-bar', key: 'frame' } as const, 0)
-const usageAtom = atom({ plugin: 'mocha-bar', key: 'usage' } as const, NO_USAGE)
-const effortAtom = atom({ plugin: 'mocha-bar', key: 'effort' } as const, null as string | null)
-const diffStepsAtom = atom({ plugin: 'mocha-bar', key: 'diffSteps' } as const, [] as DiffStep[])
-const diffIndexAtom = atom({ plugin: 'mocha-bar', key: 'diffIndex' } as const, 0)
+const frameAtom = atom({ plugin: 'cc-band-pro', key: 'frame' } as const, 0)
+const usageAtom = atom({ plugin: 'cc-band-pro', key: 'usage' } as const, NO_USAGE)
+const effortAtom = atom({ plugin: 'cc-band-pro', key: 'effort' } as const, null as string | null)
+const diffStepsAtom = atom({ plugin: 'cc-band-pro', key: 'diffSteps' } as const, [] as DiffStep[])
+const diffIndexAtom = atom({ plugin: 'cc-band-pro', key: 'diffIndex' } as const, 0)
 
 /** The thinking block's two crab thumbnails, read once per load; undefined when an asset is missing. */
 let crabPngs: { idle: string; typing: string } | null = null

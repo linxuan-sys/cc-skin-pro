@@ -16,7 +16,7 @@ export type Usage = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'mocha-bar': {
+    'cc-band-pro': {
       /** The spinner's frame: it advances while a turn runs and drops back to 0 after. */
       frame: number
       usage: Usage

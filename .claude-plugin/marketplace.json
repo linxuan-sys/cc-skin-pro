@@ -6,8 +6,8 @@
   },
   "plugins": [
     {
-      "name": "mocha-bar",
-      "source": "./plugins/mocha-bar",
+      "name": "cc-band-pro",
+      "source": "./plugins/cc-band-pro",
       "description": "cc-skin-pro's powerline bar alone, locked to Catppuccin Mocha: thinking, model, diff, tree, marks and usage, each block opening its own plugin's pane at once, mid-turn, with no line left in the conversation."
     },
     {
