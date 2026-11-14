@@ -1,0 +1,50 @@
+{
+  "name": "session-meter",
+  "version": "0.4.26",
+  "description": "Local fork of session-meter 0.4.26: a live /ctx pane for context breakdown, usage limits with pace, tool calls and model requests; sends the model one-time threshold notes and can compact or clear on its own",
+  "author": { "name": "Mehmet Aras", "url": "https://github.com/arasovic" },
+  "repository": "https://github.com/arasovic/claude-code-mods",
+  "license": "MIT",
+  "keywords": [
+    "session",
+    "usage",
+    "context",
+    "limits",
+    "pane",
+    "fork"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Open the pane at start",
+      "description": "Open the session pane on its own when a terminal session starts (never in the desktop app, which shows context in its own sidebar). Turn off to keep the screen clear; /ctx still opens it, and the notes to the model still go out.",
+      "required": false,
+      "default": true
+    },
+    "contextAction": {
+      "type": "string",
+      "title": "At the context threshold",
+      "description": "suggest: the model suggests /compact or a fresh session and you decide. compact: the model compacts at a natural break and continues, or waits for you when the next step is yours. compact-or-clear: it may also clear, after writing a handoff that starts the new session. A plain -p run always gets suggest.",
+      "required": false,
+      "default": "suggest",
+      "options": ["suggest", "compact", "compact-or-clear"]
+    },
+    "contextAt": {
+      "type": "number",
+      "title": "Context threshold (%)",
+      "description": "How full the context window gets before the model is told.",
+      "required": false,
+      "default": 60,
+      "min": 10,
+      "max": 95
+    },
+    "commitNudge": {
+      "type": "boolean",
+      "title": "Remind after a commit",
+      "description": "With compact or compact-or-clear: after each commit Claude makes while the context is at or above the threshold, remind the model that the commit is a good moment to compact, after any review the commit still needs.",
+      "required": false,
+      "default": false
+    }
+  }
+}

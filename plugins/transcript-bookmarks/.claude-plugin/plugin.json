@@ -1,0 +1,24 @@
+{
+  "name": "transcript-bookmarks",
+  "displayName": "Transcript Bookmarks",
+  "version": "0.3.0",
+  "description": "Bookmark transcript messages or selected text and jump back to them from a side pane",
+  "author": {
+    "name": "Matteo Piazza"
+  },
+  "homepage": "https://github.com/arcadeJHS/claude-code-mods/tree/main/transcript-bookmarks",
+  "repository": "https://github.com/arcadeJHS/claude-code-mods",
+  "license": "WTFPL",
+  "dependencies": ["skins@cc-skin-pro"],
+  "icon": "./icon.png",
+  "documentationUrl": "https://github.com/arcadeJHS/claude-code-mods/blob/main/transcript-bookmarks/README.md",
+  "supportUrl": "https://github.com/arcadeJHS/claude-code-mods/issues",
+  "privacyPolicyUrl": "https://github.com/arcadeJHS/claude-code-mods/blob/main/transcript-bookmarks/README.md#privacy",
+  "keywords": [
+    "bookmarks",
+    "transcript",
+    "navigation",
+    "pane",
+    "mod"
+  ]
+}

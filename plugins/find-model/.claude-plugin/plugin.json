@@ -1,0 +1,17 @@
+{
+  "name": "find-model",
+  "version": "0.1.0",
+  "description": "A sidebar model picker: the same list as /model, with search and an effort row.",
+  "author": {
+    "name": "Linxuan"
+  },
+  "license": "MIT",
+  "keywords": [
+    "model",
+    "picker",
+    "pane",
+    "sidebar",
+    "effort"
+  ],
+  "types": "./types/index.d.ts"
+}

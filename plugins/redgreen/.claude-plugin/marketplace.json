@@ -1,0 +1,12 @@
+{
+  "name": "redgreen",
+  "description": "Test results pane for Claude Code",
+  "owner": { "name": "hellosverre", "url": "https://github.com/hellosverre" },
+  "plugins": [
+    {
+      "name": "redgreen",
+      "source": "./",
+      "description": "Every test run Claude makes becomes a pass/fail list with failure detail and run history"
+    }
+  ]
+}

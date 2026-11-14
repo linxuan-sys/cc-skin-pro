@@ -1,0 +1,24 @@
+{
+  "name": "mocha-bar",
+  "version": "0.1.0",
+  "description": "cc-skin-pro's powerline bar alone, locked to Catppuccin Mocha: thinking, model, diff, tree, marks and usage, each block opening its own plugin's pane at once, mid-turn, with no line left in the conversation.",
+  "dependencies": [
+    "find-model@cc-skin-pro",
+    "filetree@cc-skin-pro",
+    "session-meter@cc-skin-pro",
+    "after@cc-skin-pro",
+    "transcript-bookmarks@cc-skin-pro"
+  ],
+  "author": {
+    "name": "Linxuan"
+  },
+  "license": "MIT",
+  "keywords": [
+    "statusline",
+    "powerline",
+    "band",
+    "catppuccin",
+    "diff"
+  ],
+  "types": "./types/index.d.ts"
+}

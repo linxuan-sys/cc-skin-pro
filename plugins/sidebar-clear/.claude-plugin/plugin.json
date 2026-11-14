@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "sidebar-clear",
+  "version": "0.1.0",
+  "description": "Paints plugin sidebars with no background of their own, so your terminal's background (and its opacity) shows through instead of the theme's solid gray.",
+  "author": {
+    "name": "万昊轩",
+    "email": "icefever@qq.com"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "cc-skin-pro",
+  "description": "The mocha-bar powerline band, the plugins its blocks open (find-model, filetree, session-meter and after), and Transcript Bookmarks, bundled so one marketplace holds them all.",
+  "owner": {
+    "name": "Linxuan"
+  },
+  "plugins": [
+    {
+      "name": "mocha-bar",
+      "source": "./plugins/mocha-bar",
+      "description": "cc-skin-pro's powerline bar alone, locked to Catppuccin Mocha: thinking, model, diff, tree, marks and usage, each block opening its own plugin's pane at once, mid-turn, with no line left in the conversation."
+    },
+    {
+      "name": "find-model",
+      "source": "./plugins/find-model",
+      "description": "A sidebar model picker: the same list as /model, with search and an effort row."
+    },
+    {
+      "name": "filetree",
+      "source": "./plugins/filetree",
+      "description": "An IDE-style file tree for Claude Code that shows what Claude is doing and where in files."
+    },
+    {
+      "name": "session-meter",
+      "source": "./plugins/session-meter",
+      "description": "A live /ctx pane: the context window by category, usage limits with pace, tool calls and model requests."
+    },
+    {
+      "name": "after",
+      "source": "./plugins/after",
+      "description": "A real prompt queue for Claude Code: /after <task> runs it after the current task, without steering; reorder and edit the queue on a band or in a side pane. A local fork, maintained here."
+    },
+    {
+      "name": "transcript-bookmarks",
+      "source": "./plugins/transcript-bookmarks",
+      "description": "Bookmark transcript messages or selected text and jump back to them from a side pane. A local fork: the pane renders each bookmark with skins' markdown renderer; requires skins, and falls back to plain text when the skin is off."
+    },
+    {
+      "name": "cc-dsh-like",
+      "source": "./plugins/cc-dsh-like",
+      "description": "A dsh-TUI style start page for Claude Code: the Claude-girl portrait with the CLAUDE/CODE dot-matrix wordmark, and she reacts when you click her."
+    },
+    {
+      "name": "sidebar-clear",
+      "source": "./plugins/sidebar-clear",
+      "description": "Paints plugin sidebars with no background of their own, so your terminal's background and its opacity show through instead of the theme's solid gray."
+    },
+    {
+      "name": "paste-preview",
+      "source": "./plugins/paste-preview",
+      "description": "Local fork of paste-preview 0.2.0: previews pasted images above the prompt and appends thumbnails under sent messages; the editor opens only when you click Edit."
+    },
+    {
+      "name": "skins",
+      "source": "./plugins/skins",
+      "description": "Skins for Claude Code: tool rows with icons, diff, table and Mermaid chart cards, a usage band and fifteen themes. /skin swaps them live."
+    },
+    {
+      "name": "redgreen",
+      "source": "./plugins/redgreen",
+      "description": "Test results in a pane: failures from Claude's vitest, jest, pytest, cargo, go, bun and deno runs, their detail and run history."
+    },
+    {
+      "name": "smart-compact",
+      "source": "./plugins/smart-compact",
+      "description": "Compacts at the right moment: after a commit or green tests, before the prompt cache expires, or when Claude asks for it."
+    },
+    {
+      "name": "mod-store",
+      "source": "./plugins/mod-store",
+      "description": "An app store for Claude Code mods in a pane: /mods to browse, search and install 2,700 community mods, with what each can access shown before you install."
+    }
+  ]
+}

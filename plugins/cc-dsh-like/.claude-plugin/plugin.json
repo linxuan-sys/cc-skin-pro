@@ -1,0 +1,18 @@
+{
+  "name": "cc-dsh-like",
+  "version": "0.1.0",
+  "description": "A dsh-TUI style start page for Claude Code: the Claude-girl portrait with the CLAUDE/CODE dot-matrix wordmark, and she reacts when you click her.",
+  "author": {
+    "name": "Linxuan",
+    "url": "https://github.com/linxuan-sys"
+  },
+  "license": "MIT",
+  "keywords": [
+    "splash",
+    "mascot",
+    "portrait",
+    "startup",
+    "dsh-tui",
+    "terminal"
+  ]
+}
