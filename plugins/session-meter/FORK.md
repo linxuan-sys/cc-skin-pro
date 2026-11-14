@@ -13,8 +13,9 @@
   - `types/index.d.ts` declares the `session-meter` plugin state.
   - The test helper and desktop mount use the same namespace.
 - README image path points at this plugin's own `docs/session-meter.png`.
-- No pane, threshold, compaction or persistence behaviour was changed.
+- `autoOpen` now defaults to `false` (upstream: `true`): the pane stays closed until `/ctx`, and turning the option on still opens it at session start.
+- No threshold, compaction or persistence behaviour was changed.
 
 ## Why this copy exists
 
-So an upstream release cannot change the behaviour under this installation. Update it by copying a newer upstream source deliberately, not automatically. The `/ctx` command, `autoOpen`, `contextAction`, `contextAt` and `commitNudge` options are unchanged.
+So an upstream release cannot change the behaviour under this installation. Update it by copying a newer upstream source deliberately, not automatically. The `/ctx` command and the `autoOpen`, `contextAction`, `contextAt` and `commitNudge` options are otherwise unchanged.

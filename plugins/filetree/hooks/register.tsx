@@ -3241,7 +3241,7 @@ export const register: Register = (on, options) => {
   splitAt = options?.split === 'top' ? 'top' : 'bottom'
   jumpMovesClaude = options?.jump !== 'tree'
   on('session.start', async ($, e, next) => {
-    noDock = options?.start === 'off'
+    noDock = options?.start !== 'on'
     outside = []
     workTouches = []
     workLast = 0
@@ -3550,7 +3550,7 @@ export const register: Register = (on, options) => {
       await $.process.run(['sh', '-c', CLEAN, 'sh', dir], { timeoutMs: 10_000 }).catch(() => undefined)
     }
     if (e.reason === 'clear' || e.reason === 'resume' || e.reason === 'other') {
-      noDock = options?.start === 'off'
+      noDock = options?.start !== 'on'
       $.clock.after(0, () => void settleRoot($).then(() => applyStart($)))
     }
     return result

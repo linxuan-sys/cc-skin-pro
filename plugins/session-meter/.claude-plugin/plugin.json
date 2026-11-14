@@ -20,7 +20,7 @@
       "title": "Open the pane at start",
       "description": "Open the session pane on its own when a terminal session starts (never in the desktop app, which shows context in its own sidebar). Turn off to keep the screen clear; /ctx still opens it, and the notes to the model still go out.",
       "required": false,
-      "default": true
+      "default": false
     },
     "contextAction": {
       "type": "string",

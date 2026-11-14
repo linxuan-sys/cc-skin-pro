@@ -349,7 +349,7 @@ export const register: Register = (on, options) => {
     await refresh($).catch(() => undefined)
     await sample($, (await read($, reading)).limits)
     // Only the terminal REPL: the desktop app runs without one and shows context in its own sidebar.
-    if (options.autoOpen !== false && e.surface === 'terminal') void $.ui.open({ id: PANE, title: 'Session' })
+    if (options.autoOpen === true && e.surface === 'terminal') void $.ui.open({ id: PANE, title: 'Session' })
     return next(e)
   })
 

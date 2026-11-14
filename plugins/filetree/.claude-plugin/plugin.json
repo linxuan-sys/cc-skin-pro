@@ -82,7 +82,7 @@
       "type": "string",
       "title": "Open at start",
       "description": "on: the pane opens when a session starts. off: it stays closed until you run /filetree.",
-      "default": "on",
+      "default": "off",
       "options": [
         "on",
         "off"
