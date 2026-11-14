@@ -14,8 +14,8 @@ The page is placed once, at `session.start`, and scrolls up with the conversatio
 ## Install
 
 ```sh
-claude plugin marketplace add linxuan-sys/cc-ui
-claude plugin install cc-dsh-like@cc-ui
+claude plugin marketplace add linxuan-sys/cc-skin-pro
+claude plugin install cc-dsh-like@cc-skin-pro
 ```
 
 ## Making it yours

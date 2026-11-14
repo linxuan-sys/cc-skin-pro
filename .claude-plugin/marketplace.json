@@ -1,6 +1,6 @@
 {
   "name": "cc-skin-pro",
-  "description": "The mocha-bar powerline band, the plugins its blocks open (find-model, filetree, session-meter and after), and Transcript Bookmarks, bundled so one marketplace holds them all.",
+  "description": "A complete Claude Code setup in one marketplace: the dsh-TUI start page, skins and UI polish, and the plugins around them — file tree, model picker, context meter, prompt queue, bookmarks, test results, smart compaction and a mod store.",
   "owner": {
     "name": "Linxuan"
   },

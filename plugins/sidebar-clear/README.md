@@ -14,8 +14,8 @@ That is the whole plugin — `hooks/register.tsx` is about twenty lines.
 ## Install
 
 ```sh
-claude plugin marketplace add linxuan-sys/cc-ui
-claude plugin install sidebar-clear@cc-ui
+claude plugin marketplace add linxuan-sys/cc-skin-pro
+claude plugin install sidebar-clear@cc-skin-pro
 ```
 
 ## Pairs with
