@@ -44,7 +44,8 @@ const Love: ClientModule<LoveProps, LoveState> = (props, surface) => {
       if (count === 0) return
       surface.setState({ index: (state.index + 1) % count })
     })
-    surface.setState({ index: 0 })
+    // A random line on open; a click still walks to the next one, wrapping around.
+    surface.setState({ index: props.texts.length > 0 ? Math.floor(Math.random() * props.texts.length) : 0 })
   }
 
   const { Box, Text } = surface.elements

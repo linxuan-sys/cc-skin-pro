@@ -27,10 +27,10 @@ const WANT_COLUMNS = 30
 const CUTE_MS = 2200
 
 /** Show Clawd first, then the picture — the wait also lands past the engine's first wipe. */
-const REVEAL_MS = 1000
+const REVEAL_MS = 2900
 /** Clawd blinks twice mid-wait — close, open, close, open — before the handoff. */
-const BLINK_AT_MS: readonly number[] = [350, 760]
-const BLINK_MS = 160
+const BLINK_AT_MS: readonly number[] = [1400, 2200]
+const BLINK_MS = 200
 /** One second after the picture lands, the cute look plays on its own. */
 const AUTO_POKE_MS = 1000
 /** Let the reveal land, then tap the screen so the engine resends every image. */
@@ -247,8 +247,10 @@ export const register: Register = on => {
       })
     })
 
-    // Kitty unreachable (tmux, another terminal, a background host): the resume path still
-    // resends, just with the alt-screen clear that makes it a coin toss.
+    // Last resort when the kitten call itself fails (remote control off, kitten missing):
+    // SIGCONT makes the engine walk its resume path and resend the picture, at the cost
+    // of the alt-screen clear that makes it a coin toss. tmux never gets this far —
+    // hasGraphics is false there and tap returns before calling this.
     const resend = (): void => {
       note?.('sigcont')
       try {
