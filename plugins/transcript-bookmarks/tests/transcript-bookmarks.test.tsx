@@ -109,9 +109,9 @@ test('the hover mark bookmarks a message once', async ($, on) => {
       props: { text: `Answer drawn on ${surface}`, isFirstOfReply: true },
       viewport: FULLSCREEN,
     })
-    expect((await row.find({ key: `mark:msg-${surface}` }))?.text).toBe('📌')
+    expect((await row.find({ key: `mark:msg-${surface}` }))?.text).toBe('')
     await row.press({ key: `mark:msg-${surface}` })
-    expect((await row.find({ key: `mark:msg-${surface}` }))?.text).toBe('★')
+    expect((await row.find({ key: `mark:msg-${surface}` }))?.text).toBe('')
     await row.press({ key: `mark:msg-${surface}` })
     expect(seen.toasts).toContain('That message is already bookmarked')
     await row.unmount()
@@ -346,11 +346,11 @@ test('/clear empties the list and the old session keeps its bookmarks', async ($
     props: { text: 'First answer', isFirstOfReply: true },
     viewport: FULLSCREEN,
   })
-  expect((await row.find({ key: 'mark:msg-a' }))?.text).toBe('★')
+  expect((await row.find({ key: 'mark:msg-a' }))?.text).toBe('')
 
   seen.session = 'session-2'
   await $.session.end({ reason: 'clear', sessionId: SESSION, resume: { id: SESSION } })
-  expect((await row.find({ key: 'mark:msg-a' }))?.text).toBe('📌')
+  expect((await row.find({ key: 'mark:msg-a' }))?.text).toBe('')
   const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect(await pane.find({ text: /No bookmarks yet/ })).toBeDefined()
 

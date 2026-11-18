@@ -20,6 +20,8 @@ const STORE_INDEX = 'bookmarks-index'
 const MAX_BOOKMARKS = 200
 const MAX_SESSIONS = 50
 const MAX_TEXT = 2000
+const PIN = ' '
+const STAR = ' '
 const MAX_ROWS = 500
 const PREVIEW_LINES = 3
 const GUIDE_TOAST_MS = 6000
@@ -387,7 +389,7 @@ function markable(
           plain
           dimColor
           key={`mark:${requestId}`}
-          label={isMarked ? '★' : '📌'}
+          label={isMarked ? STAR : PIN}
           onPress={() => markMessage($, requestId, row)}
         />
       </Box>
@@ -555,7 +557,7 @@ export const register: Register = on => {
         {items.length === 0 && (
           <Box marginTop={1}>
             <Text dimColor>
-              No bookmarks yet. Hover a message and click 📌, or select text with the mouse and
+              No bookmarks yet. Hover a message and click {PIN}, or select text with the mouse and
               press "+ Bookmark selection" (or type /bookmark).
             </Text>
           </Box>
