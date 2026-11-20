@@ -16,6 +16,8 @@ export const DEFAULT_THEME: Theme = {
   bg: '',
 }
 
+export const DARK_TERMINAL_THEME: Theme = { ...DEFAULT_THEME, accent: '#cba6f7' }
+
 export function emptyTree(root: string): FileTree {
   return {
     root,

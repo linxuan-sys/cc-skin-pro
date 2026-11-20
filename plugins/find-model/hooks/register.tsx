@@ -200,9 +200,6 @@ const openPicker = async ($: EngineInterface) => {
   return opened
 }
 
-/** Whether `warm` has run since this module loaded: one read a load, not one a frame. */
-let warmed = false
-
 /**
  * Reads the list into the pane's state without opening it, so another plugin
  * (a bar's model block) can open this pane by its id and find it drawn. The
@@ -210,8 +207,6 @@ let warmed = false
  * effort `sync` keeps current once the pane shows. A no-op once it has a list.
  */
 const warm = async ($: EngineInterface) => {
-  if (warmed) return
-  warmed = true
   if ((await read($, view)).models.length > 0) return
   const { models, labels } = await readModels($)
   if (models.length === 0) return
@@ -372,7 +367,6 @@ export const register: Register = on => {
       active: anchor,
       activeBg: '#2A2F3A',
       hoverBg: '#232833',
-      tones: {},
       ...(bar ? { bar } : {}),
     } satisfies RowsProps
 

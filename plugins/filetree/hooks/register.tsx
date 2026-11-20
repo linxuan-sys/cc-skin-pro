@@ -25,6 +25,7 @@ import {
   age,
   ancestorsOf,
   type Change,
+  DARK_TERMINAL_THEME,
   DEFAULT_THEME,
   dirname,
   emptyTree,
@@ -154,6 +155,7 @@ let previewed: Preview | null = null
 let previewRows = 20
 let splitAt: 'bottom' | 'top' = 'bottom'
 let jumpMovesClaude = true
+let rightClickAbsolute = false
 let followWork = true
 let workTouches: Touch[] = []
 let workLast = 0
@@ -2147,7 +2149,7 @@ async function considerWork($: EngineInterface): Promise<void> {
     $.clock.after(0, async () => {
       try {
         await $.command.run({ command: 'cd', args: repo })
-        void $.ui.toast(`followed the work to ${shortPath(repo)}`)
+        void $.ui.toast(`filetree moved to the cwd`)
         $.clock.after(400, () => void (follow ? followCwd($) : reset($, repo)))
       } catch (error) {
         void $.ui.toast(`could not move Claude to ${shortPath(repo)}: ${error instanceof Error ? error.message : String(error)}`)
@@ -3209,7 +3211,6 @@ function shortPath(path: string): string {
 }
 
 export const register: Register = (on, options) => {
-
   // Band bridge: another mod opens this pane mid-turn; ownership and drawing stay here (#110615).
   on('engine.create', async ($, e, next) => ({ ...(await next(e)), filetree: { open: async () => undefined } }))
   on('filetree.open', async ($) => {
@@ -3247,6 +3248,7 @@ export const register: Register = (on, options) => {
   targetSetting = terminalTarget(options?.target)
   splitAt = options?.split === 'top' ? 'top' : 'bottom'
   jumpMovesClaude = options?.jump !== 'tree'
+  rightClickAbsolute = options?.copy === 'absolute'
   on('session.start', async ($, e, next) => {
     noDock = options?.start !== 'on'
     outside = []
@@ -3324,7 +3326,7 @@ export const register: Register = (on, options) => {
     follow = !arg
     const root = arg ? resolve(cwd, arg, home) : cwd
     await reset($, root, focusOnOpen || given !== '' || mine?.isPlaced === true)
-    return { text: `File tree on ${shortPath(root)}${follow ? ' (follows the cwd)' : ''}.` }
+    return { text: `File tree on ${shortPath(root)}${follow ? ' (moves with the cwd)' : ''}.` }
   })
 
   on('tool.call', async ($, e, next) => {
@@ -3473,7 +3475,7 @@ export const register: Register = (on, options) => {
     void sync($)
     const t = await get($)
     if (typeof data.copy === 'string') {
-      await copyPath($, data.copy === ROOT_PRESS ? t.root : data.copy.replace(/^grep:\d+:/, ''), Boolean(data.shift), e.surface)
+      await copyPath($, data.copy === ROOT_PRESS ? t.root : data.copy.replace(/^grep:\d+:/, ''), Boolean(data.shift) !== rightClickAbsolute, e.surface)
       return {}
     }
     if (typeof data.scrollTo === 'number') {
@@ -3686,7 +3688,7 @@ export const register: Register = (on, options) => {
     const Image = 'Image' in elements ? elements.Image : undefined
     const t = await get($)
     const light = e.surface !== 'desktop' && lightTerminal
-    const theme: Theme = { ...DEFAULT_THEME, ...palette.theme }
+    const theme: Theme = { ...(e.surface === 'terminal' && !light ? DARK_TERMINAL_THEME : DEFAULT_THEME), ...palette.theme }
     const tones = light ? LIGHT_TONES : TONES
     const mutedText = theme.muted ? { color: theme.muted } : { dimColor: true }
     const gitColors = { ...(desk ? DESK_GIT_TEXT : GIT_COLOR), ...palette.git }
@@ -4495,6 +4497,7 @@ export const register: Register = (on, options) => {
           const lift: [Rgb, number] | undefined = picked ? [ink, 0.85] : hot && tone ? [tone, 0.8] : tone ? [paper, 0.35] : undefined
           return { tone, lift }
         }
+        const topLabel = theme.accent.startsWith('#') ? hex(inkOn(colorOf(theme.accent, termColors, light), [[0, 0, 0], [255, 255, 255]])) : 'ansi256(0)'
         const look = (tile: Tile) => {
           const picked = tile === pick
           const { tone, lift } = heat(tile, picked)
@@ -4509,7 +4512,8 @@ export const register: Register = (on, options) => {
             return { name: c, size: c, bold: true, bg: hex(box.fill), rank: 0 }
           }
           const top = !dimmed(tile) && !(tile.depth % 2)
-          return { name: top ? 'ansi256(0)' : 'ansi256(15)', size: top ? 'ansi256(0)' : 'ansi256(15)', bold: true, bg: top ? 'ansi256(4)' : 'ansi256(8)', rank: 0 }
+          const label = top ? topLabel : 'ansi256(15)'
+          return { name: label, size: label, bold: true, bg: top ? theme.accent : 'ansi256(8)', rank: 0 }
         }
         const amount = scan.loc ? formatLoc : formatSize
         status = pick ? `${pick.name} ${amount(pick.bytes)} ${pct(pick.bytes)}` : `${amount(total)}${scan.loc ? ' lines' : ''}${scan.done ? '' : ' …'}`
