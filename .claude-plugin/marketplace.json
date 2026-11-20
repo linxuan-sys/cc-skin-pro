@@ -61,11 +61,6 @@
       "description": "Test results in a pane: failures from Claude's vitest, jest, pytest, cargo, go, bun and deno runs, their detail and run history."
     },
     {
-      "name": "smart-compact",
-      "source": "./plugins/smart-compact",
-      "description": "Compacts at the right moment: after a commit or green tests, before the prompt cache expires, or when Claude asks for it."
-    },
-    {
       "name": "mod-store",
       "source": "./plugins/mod-store",
       "description": "An app store for Claude Code mods in a pane: /mods to browse, search and install 2,700 community mods, with what each can access shown before you install."

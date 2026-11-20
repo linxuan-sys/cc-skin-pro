@@ -7,13 +7,13 @@
  * Knobs:
  *   - Portrait size — WANT_COLUMNS
  *   - Cute-look (撒娇) duration — CUTE_MS
- *   - Clawd-before-picture wait — REVEAL_MS
+ *   - Clawd-before-picture wait — BLINK_AT_MS / AFTER_LAST_BLINK_MS
  *   - Wide wordmark — BIG_TOP_ROWS / BIG_BOTTOM_ROWS
  *   - Narrow wordmark — NARROW_TOP_ROWS / NARROW_BOTTOM_ROWS
  *   - Wordmark colors — BIG_FROM / BIG_MID / BIG_TO
  *   - Taglines — LOVE_TEXTS (click to cycle)
  *   - Images — swap the PNGs in assets/
- *   - No-graphics fallback — CLAWD_ROWS (drawn when the engine cannot show images)
+ *   - Pre-reveal placeholder — CLAWD_ROWS (blinks until the picture lands)
  */
 import type { Register } from 'claude-code'
 
@@ -26,23 +26,13 @@ const WANT_COLUMNS = 30
 
 const CUTE_MS = 2200
 
-/** Show Clawd first, then the picture — the wait also lands past the engine's first wipe. */
-const REVEAL_MS = 2900
-/** Clawd blinks twice mid-wait — close, open, close, open — before the handoff. */
+/** Show Clawd first, then the picture. */
 const BLINK_AT_MS: readonly number[] = [1400, 2200]
+/** The reveal grows from the last blink's end: blink over → picture at once. */
+const AFTER_LAST_BLINK_MS = 0
 const BLINK_MS = 200
 /** One second after the picture lands, the cute look plays on its own. */
 const AUTO_POKE_MS = 1000
-/** Let the reveal land, then tap the screen so the engine resends every image. */
-const ACTIVATE_MS = 120
-/** One retry in case the first tap raced a repaint. */
-const TAP_RETRY_MS = 600
-/** One line per hook entry; read it after a view switch to see what the engine called. */
-const TRACE_FILE = '/tmp/cc-dsh-like-events.log'
-
-/** Wait for the first paint, then ask the engine whether the picture drew as pixels or alt. */
-const PROBE_MS = 300
-const PROBE_TRIES = 3
 
 const POKE_KEY = 'poke'
 const SKILLS_KEY = 'skills'
@@ -94,19 +84,19 @@ const LOVE_TEXTS: readonly string[] = [
 
 /** Top row `CLAUDE`; bottom row `CODE`, left-aligned with the top. */
 const BIG_TOP_ROWS: readonly string[] = [
-  ' █████   ██        ████    ██  ██   ██████   ██████',
+  ' █████   ██        ████    ██  ██   █████    ██████',
   '██  ██   ██       ██  ██   ██  ██   ██  ██   ██',
   '██       ██       ██████   ██  ██   ██  ██   █████',
   '██  ██   ██       ██  ██   ██  ██   ██  ██   ██',
-  ' █████   ██████   ██  ██    ████    ██████   ██████',
+  ' █████   ██████   ██  ██    ████    █████    ██████',
 ]
 
 const BIG_BOTTOM_ROWS: readonly string[] = [
-  ' █████    ████    ██████   ██████',
+  ' █████    ████    █████    ██████',
   '██  ██   ██  ██   ██  ██   ██',
   '██       ██  ██   ██  ██   █████',
   '██  ██   ██  ██   ██  ██   ██',
-  ' █████    ████    ██████   ██████',
+  ' █████    ████    █████    ██████',
 ]
 
 const BIG_COLUMNS = 51
@@ -121,11 +111,11 @@ const NARROW_TOP_ROWS: readonly string[] = [
 ]
 
 const NARROW_BOTTOM_ROWS: readonly string[] = [
-  '██  ██   ██████   ██████',
+  '██  ██   █████    ██████',
   '██  ██   ██  ██   ██    ',
   '██  ██   ██  ██   █████ ',
   '██  ██   ██  ██   ██    ',
-  ' ████    ██████   ██████',
+  ' ████    █████    ██████',
 ]
 
 const NARROW_COLUMNS = 24
@@ -179,117 +169,42 @@ let normalFile: string | undefined
 let cuteFile: string | undefined
 let isCute = false
 let skillNames: readonly string[] = []
-/** False until REVEAL_MS: the row shows Clawd so no picture is drawn into the engine's first wipe. */
+/** False until the reveal: the row shows Clawd until then. */
 let imageReady = false
 /** True for BLINK_MS: the fallback draws the shut-eye frame. */
 let clawdBlink = false
-
-/** Set in session.start from the tmux veto; the engine's blit verdict can still demote it. */
-let hasGraphics = true
-/** One engine probe per process: did the picture really draw as pixels, or as its alt? */
-let probeState: 'idle' | 'pending' | 'done' = 'idle'
-/** Latest mounted picture site, read by the probe when it fires. */
-let mountInfo: { requestId: string; columns: number; rows: number; file: string } | undefined
-/** Debug trail, one line per hook entry, shown by reading TRACE_FILE. */
-let trace = ''
-let note: ((text: string) => void) | undefined
+/** Bumped per session.start: timers of an earlier session (a view-switch replay)
+ * check it and retire, so they cannot flip state under the new one. */
+let epoch = 0
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    note = (text: string): void => {
-      trace += `${new Date().toISOString()} ${text}\n`
-      void $.fs.write(TRACE_FILE, trace).catch(() => {})
-    }
-    note('session.start')
-    // Clawd first: the engine's first full repaint wipes a picture drawn too early. The
-    // reveal after a second lands past that window; the probe's blit then sends the picture.
+    epoch += 1
+    const mine = epoch
     imageReady = false
-    probeState = 'idle'
     clawdBlink = false
     isCute = false
-    // Blink twice while he waits: shut the eyes, open them, then again before the picture.
-    let kittyWindow: string | undefined
-    for (const at of BLINK_AT_MS) {
-      $.clock.after(at, () => {
-        clawdBlink = true
-        $.ui.invalidate('ui.render')
-        $.clock.after(BLINK_MS, () => {
-          clawdBlink = false
-          $.ui.invalidate('ui.render')
-          note?.('blink end')
-        })
-      })
-    }
-    $.clock.after(REVEAL_MS, () => {
-      note?.('reveal')
+    // Blink and the reveal are one causal chain: the last blink's end callback grows
+    // the reveal, so whenever the eyes blinked the picture must follow.
+    const reveal = (): void => {
+      if (mine !== epoch) return
       imageReady = true
       $.ui.invalidate('ui.render')
-      // A click is just bytes on stdin: kitty's remote control writes the focus toggle and
-      // a real left press/release into this session, so the engine walks the exact same
-      // terminal-focus path a hand click does — no alt-screen clear, pixels re-sent.
-      $.clock.after(ACTIVATE_MS, () => {
-        tap()
-        $.clock.after(TAP_RETRY_MS, tap)
-      })
       // One second after the picture lands, flip to the cute look — the state a hand
-      // poke sets. The new source only reaches the terminal on a resend, so tap with
-      // it; CUTE_MS later she is back to the normal picture.
+      // poke sets. CUTE_MS later she is back to the normal picture.
       $.clock.after(AUTO_POKE_MS, () => {
-        if (isCute) return
-        note?.('cute')
+        if (mine !== epoch || isCute) return
         isCute = true
         $.ui.invalidate('ui.render')
-        tap()
         $.clock.after(CUTE_MS, () => {
+          if (mine !== epoch) return
           isCute = false
           $.ui.invalidate('ui.render')
         })
       })
-    })
-
-    // Last resort when the kitten call itself fails (remote control off, kitten missing):
-    // SIGCONT makes the engine walk its resume path and resend the picture, at the cost
-    // of the alt-screen clear that makes it a coin toss. tmux never gets this far —
-    // hasGraphics is false there and tap returns before calling this.
-    const resend = (): void => {
-      note?.('sigcont')
-      try {
-        process.kill(process.pid, 'SIGCONT')
-      } catch {
-        // No signals here; the picture will need a real click.
-      }
     }
-    const tap = (): void => {
-      // No picture drawn: a tap would only inject clicks into whatever hosts us.
-      if (!hasGraphics) return
-      note?.('tap')
-      // No window id (a launcher or a nested host drops it): the focused kitty window
-      // is the one this session is in at tap time.
-      const target = kittyWindow === undefined ? 'state:focused' : `id:${kittyWindow}`
-      try {
-        void $.process.run([
-          'kitten', '@', 'send-text', '--match', target,
-          '\\e[O\\e[I\\e[<0;1;1M\\e[<0;1;1m',
-        ]).then(
-          ({ exitCode }) => {
-            if (exitCode !== 0) resend()
-          },
-          () => resend(),
-        )
-      } catch {
-        resend()
-      }
-    }
-
-    // Read once per session so ui.render stays synchronous. tmux and an editor's
-    // :terminal inherit the outer kitty's env while the graphics escapes never pass
-    // through: tmux, nvim ($NVIM), vim ($VIM_TERMINAL). Everywhere else the engine has
-    // the last word — see the blit probe in ui.render.
-    const tmux = await $.env.get('TMUX')
-    const nvim = await $.env.get('NVIM')
-    const vimTerminal = await $.env.get('VIM_TERMINAL')
-    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
-    kittyWindow = await $.env.get('KITTY_WINDOW_ID')
+    // Blinks are scheduled once the row is placed, below: an -p or --resume run
+    // places nothing and must not fire a reveal into thin air.
 
     for (const base of [$.plugin.root, `${$.plugin.root}/..`]) {
       const normal = `${base}/assets/claude-girl.png`
@@ -318,7 +233,26 @@ export const register: Register = on => {
     }
 
     const placed = await $.ui.place({ id: ROW_ID })
-    if (!placed.isPlaced) $.ui.log(`cc-dsh-like: ${placed.reason}`, { to: 'debug' })
+    if (!placed.isPlaced) {
+      $.ui.log(`cc-dsh-like: ${placed.reason}`, { to: 'debug' })
+      return started
+    }
+    // The row is in the transcript: blink twice, then the picture.
+    let blinksDone = 0
+    for (const at of BLINK_AT_MS) {
+      $.clock.after(at, () => {
+        if (mine !== epoch) return
+        clawdBlink = true
+        $.ui.invalidate('ui.render')
+        $.clock.after(BLINK_MS, () => {
+          if (mine !== epoch) return
+          clawdBlink = false
+          $.ui.invalidate('ui.render')
+          blinksDone += 1
+          if (blinksDone === BLINK_AT_MS.length) $.clock.after(AFTER_LAST_BLINK_MS, reveal)
+        })
+      })
+    }
     return started
   })
 
@@ -327,14 +261,11 @@ export const register: Register = on => {
     if (e.surface !== 'terminal') return next(e)
 
     const { Box, Client, Image, Text } = $.ui.resolve(e)
-    // A replay after a view switch runs without the session.start state (no sniff, no paths).
-    // Bail then: drawing Clawd here would overwrite the engine's image slot with text,
-    // and the portrait could never come back. Bailing keeps the click-to-restore alive.
+    // A replay after a view switch runs without the session.start state (no paths).
+    // Bail then: drawing Clawd here would overwrite the engine's image slot with text.
     if (normalFile === undefined || cuteFile === undefined) return next(e)
-    const useImage = hasGraphics && imageReady
     const columns0 = e.viewport?.columns ?? FALLBACK_COLUMNS
     const rows0 = e.viewport?.rows ?? FALLBACK_ROWS
-    note?.(`render ready=${imageReady} image=${useImage} vp=${columns0}x${rows0} id=${e.requestId}`)
 
     // Fit the desired width first; if the height overflows, shrink the width instead.
     let columns = Math.min(WANT_COLUMNS, Math.max(1, columns0 - 4))
@@ -345,58 +276,12 @@ export const register: Register = on => {
       columns = Math.max(1, Math.min(columns0, Math.round(rows / ROWS_PER_COLUMN)))
     }
 
-    // Keep the latest picture site for the probe below.
-    mountInfo = useImage
-      ? { requestId: e.requestId, columns, rows, file: isCute ? cuteFile : normalFile }
-      : undefined
-
-    // The engine draws the picture where the terminal can and the alt elsewhere. A refusal
-    // whose reason names the alt proves it — demote then. Any other refusal (not mounted
-    // yet, a repaint in flight) is retried, never demoted.
-    if (useImage && probeState === 'idle') {
-      probeState = 'pending'
-      let attempt = 0
-      const probe = async (): Promise<void> => {
-        const mount = mountInfo
-        if (mount === undefined) {
-          probeState = 'done'
-          return
-        }
-        try {
-          const { deny } = await $.ui.blit({
-            requestId: mount.requestId,
-            key: 'claude-girl',
-            source: { file: mount.file, format: 'png' },
-            columns: mount.columns,
-            rows: mount.rows,
-          })
-          if (deny === undefined) {
-            probeState = 'done'
-            return
-          }
-          if (/alt/i.test(deny)) {
-            probeState = 'done'
-            hasGraphics = false
-            $.ui.invalidate('ui.render')
-            return
-          }
-        } catch {
-          probeState = 'done'
-          return
-        }
-        attempt += 1
-        probeState = attempt >= PROBE_TRIES ? 'idle' : 'pending'
-        if (probeState === 'pending') $.clock.after(PROBE_MS, () => void probe())
-      }
-      $.clock.after(PROBE_MS, () => void probe())
-    }
-
-    const portrait = useImage ? (
+    const portrait = imageReady ? (
       <Box key="claude-girl-column" flexDirection="column" alignItems="center" flexShrink={0}>
         <Box key="claude-girl-stack" width={columns} height={rows}>
           <Image
             key="claude-girl"
-            source={{ file: isCute ? cuteFile : normalFile, format: 'png' }}
+            source={{ file: isCute ? cuteFile as string : normalFile as string, format: 'png' }}
             columns={columns}
             rows={rows}
             alt="Claude girl"

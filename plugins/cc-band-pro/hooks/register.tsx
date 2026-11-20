@@ -196,19 +196,6 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
   }
 }
 
-/** Opens another plugin's pane by its id, mid-turn, when its own render hook answers it. */
-const openPaneNow = async ($: EngineInterface, target: Target): Promise<boolean> => {
-  const pane = target.pane
-  if (pane === undefined) {
-    return false
-  }
-  const { id, focus, closeOnEscape } = pane
-  const title = typeof pane.title === 'string' ? pane.title : pane.title(await $.session.cwd().catch(() => ''))
-  const opened = await $.ui.open({ id, title, focus, closeOnEscape }).catch(() => undefined)
-
-  return opened?.isPlaced === true
-}
-
 /**
  * What a press on the bar does: the diff opens here at once, the rest run their
  * own plugins' commands. A pane that draws from state its plugin already keeps
@@ -222,16 +209,14 @@ const onBarPress = ($: EngineInterface, press: BarPress, isWorking: boolean) => 
 
     return
   }
+  // 2.1.323+ regression (#110615): a pane opened from here renders blank, so a
+  // press runs the plugin's own command instead. openPaneNow comes back once the
+  // engine fix ships; TARGETS keeps its pane rows for that day.
   const target = TARGETS[press]
-  void openPaneNow($, target).then(now => {
-    if (now) {
-      return
-    }
-    if (isWorking) {
-      $.ui.toast(`/${target.command} queued: it opens when this turn ends`)
-    }
-    runCommand($, target)
-  })
+  if (isWorking) {
+    $.ui.toast(`/${target.command} queued: it opens when this turn ends`)
+  }
+  runCommand($, target)
 }
 
 /** A path under the session's folder as relative to it; any other as it is. */
