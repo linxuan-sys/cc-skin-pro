@@ -82,3 +82,9 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    filetree: { open: () => Promise<void> }
+  }
+}

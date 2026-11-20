@@ -174,17 +174,22 @@ const setUp = async ($: EngineInterface) => {
 }
 
 /**
- * Runs another plugin's command on a timer, in a dispatch of its own: work a
- * press starts ends with the press, and a command waits its turn while Claude
- * works unless its plugin made it immediate. A plugin that is off says so.
+ * Opens a target's pane through that plugin's own bridge, synchronously and
+ * mid-turn: the pane stays owned and drawn by its plugin (#110615), and no
+ * command is queued. A plugin that is off says so.
  */
-const runCommand = ($: EngineInterface, target: Target) => {
-  $.clock.after(1, () =>
-    $.command.run({ command: target.command }).catch((error: unknown) => {
-      const why = error instanceof Error ? error.message : String(error)
-      $.ui.toast(`/${target.command} did not run (is ${target.plugin} on?): ${why}`)
-    }),
-  )
+const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff'>) => {
+  const open = {
+    after: () => $.after.open(),
+    model: () => $.findModel.open(),
+    tree: () => $.filetree.open(),
+    mark: () => $.bookmarks.open(),
+    usage: () => $.sessionMeter.open(),
+  }[press]
+  void open().catch((error: unknown) => {
+    const why = error instanceof Error ? error.message : String(error)
+    $.ui.toast(`${TARGETS[press].plugin} pane did not open (is it on?): ${why}`)
+  })
 }
 
 /** Opens the diff pane on the last turn's edits, at the first step; a surface that cannot seat it says so in a toast. */
@@ -197,26 +202,16 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
 }
 
 /**
- * What a press on the bar does: the diff opens here at once, the rest run their
- * own plugins' commands. A pane that draws from state its plugin already keeps
- * opens straight away and leaves no line in the conversation, mid-turn or not;
- * the other commands wait for the turn to end, as one run from a hook does, so a
- * press while Claude works says it is queued.
+ * What a press on the bar does: the diff opens here at once, the rest open their
+ * own plugin's pane through its bridge, mid-turn, with no line in the conversation.
  */
-const onBarPress = ($: EngineInterface, press: BarPress, isWorking: boolean) => {
+const onBarPress = ($: EngineInterface, press: BarPress) => {
   if (press === 'diff') {
     void openDiff($).catch(() => undefined)
 
     return
   }
-  // 2.1.323+ regression (#110615): a pane opened from here renders blank, so a
-  // press runs the plugin's own command instead. openPaneNow comes back once the
-  // engine fix ships; TARGETS keeps its pane rows for that day.
-  const target = TARGETS[press]
-  if (isWorking) {
-    $.ui.toast(`/${target.command} queued: it opens when this turn ends`)
-  }
-  runCommand($, target)
+  openBridged($, press)
 }
 
 /** A path under the session's folder as relative to it; any other as it is. */
@@ -410,7 +405,7 @@ export const register: Register = on => {
 
     return (
       <Box flexDirection="column">
-        {drawPowerline(elements, pills, press => onBarPress($, press, e.props.isWorking))}
+        {drawPowerline(elements, pills, press => onBarPress($, press))}
         {below}
       </Box>
     )

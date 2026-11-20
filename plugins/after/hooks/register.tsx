@@ -80,6 +80,13 @@ const cards = new Map<string, Card | null>()
 let cardCount = 0
 
 export const register: Register = (on, options) => {
+
+  // Band bridge: another mod opens this pane mid-turn; ownership and drawing stay here (#110615).
+  on('engine.create', async ($, e, next) => ({ ...(await next(e)), after: { open: async () => undefined } }))
+  on('after.open', async ($) => {
+    await $.ui.open({ id: PANE, title: 'After', focus: true, closeOnEscape: true })
+    return { value: undefined }
+  })
   settings = {
     smart: options.smart !== false,
     model: String(options.model || 'haiku'),

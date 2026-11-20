@@ -322,6 +322,13 @@ const agentLabel = async ($: EngineInterface, id: string | undefined) => {
 }
 
 export const register: Register = (on, options) => {
+
+  // Band bridge: another mod opens this pane mid-turn; ownership and drawing stay here (#110615).
+  on('engine.create', async ($, e, next) => ({ ...(await next(e)), sessionMeter: { open: async () => undefined } }))
+  on('sessionMeter.open', async ($) => {
+    await $.ui.open({ id: PANE, title: 'Session', focus: true, closeOnEscape: true })
+    return { value: undefined }
+  })
   const { action, contextAt, commitNudge } = readOptions(options)
   const thresholds = levels(contextAt)
   // A plain -p run ends with the turn, so the tool would only stop the work. The desktop app is headless too,
@@ -337,7 +344,7 @@ export const register: Register = (on, options) => {
   let isTextShown = false
 
   on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'ctx', description: 'Show what fills the context window and how fast limits run down' })
+    await $.command.register({ name: 'ctx', description: 'Show what fills the context window and how fast limits run down', immediate: true })
     isRepl = e.isInteractive
     // An options change reloads this module and runs session.start again, but an app attached before raises no
     // session.attach, so the reload reads the roster itself. At the app's first start the roster is still empty.

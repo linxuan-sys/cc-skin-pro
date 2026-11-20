@@ -3209,6 +3209,13 @@ function shortPath(path: string): string {
 }
 
 export const register: Register = (on, options) => {
+
+  // Band bridge: another mod opens this pane mid-turn; ownership and drawing stay here (#110615).
+  on('engine.create', async ($, e, next) => ({ ...(await next(e)), filetree: { open: async () => undefined } }))
+  on('filetree.open', async ($) => {
+    await $.ui.open({ id: PANE, title: 'Files', focus: true, closeOnEscape: true })
+    return { value: undefined }
+  })
   glyphSetting = typeof options?.glyphs === 'string' ? options.glyphs : 'auto'
   shimmerOn = options?.shimmer !== 'off'
   const activity = typeof options?.activity === 'string' ? options.activity : 'reads and writes'

@@ -223,6 +223,13 @@ const warm = async ($: EngineInterface) => {
 }
 
 export const register: Register = on => {
+
+  // Band bridge: another mod opens this pane mid-turn; ownership and drawing stay here (#110615).
+  on('engine.create', async ($, e, next) => ({ ...(await next(e)), findModel: { open: async () => undefined } }))
+  on('findModel.open', async ($) => {
+    await $.ui.open({ id: PANE, title: 'Find model', focus: true, closeOnEscape: true })
+    return { value: undefined }
+  })
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'find-model',

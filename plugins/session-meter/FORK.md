@@ -19,3 +19,8 @@
 ## Why this copy exists
 
 So an upstream release cannot change the behaviour under this installation. Update it by copying a newer upstream source deliberately, not automatically. The `/ctx` command and the `autoOpen`, `contextAction`, `contextAt` and `commitNudge` options are otherwise unchanged.
+
+## Band open-bridge (2026-11-20)
+
+- `hooks/register.tsx` adds an `engine.create` noun (`sessionMeter.open`) whose hook calls `$.ui.open` on this plugin's own pane, so cc-band-pro can open it mid-turn without a queued slash command. Ownership and drawing stay in this plugin, sidestepping the cross-plugin blank-pane regression (anthropics/claude-code#110615). No existing behaviour changed; the slash command still works.
+- `types/index.d.ts` declares the noun on `EngineInterface`.

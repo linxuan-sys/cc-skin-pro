@@ -23,3 +23,9 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    findModel: { open: () => Promise<void> }
+  }
+}

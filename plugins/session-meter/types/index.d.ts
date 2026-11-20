@@ -26,3 +26,9 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    sessionMeter: { open: () => Promise<void> }
+  }
+}

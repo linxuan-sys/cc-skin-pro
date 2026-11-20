@@ -53,3 +53,9 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    after: { open: () => Promise<void> }
+  }
+}

@@ -7,7 +7,7 @@
 A hand-picked Claude Code marketplace: the **skins** engine, the **cc-band-pro**
 powerline band, and the panes and tools that make them useful — a start page, a file
 tree, a model picker, context and usage, a prompt queue, bookmarks, test results,
-compaction and a mod store.
+and a mod store.
 
 Some of these plugins are original to this marketplace, some are forks of community
 mods, and the rest are hellosverre's suite carried here so one marketplace holds a
@@ -19,7 +19,7 @@ tracked against its upstream release so updates are deliberate rather than accid
 
 **Original here:** cc-band-pro, find-model, cc-dsh-like, sidebar-clear.
 **Local forks:** filetree, session-meter, after, transcript-bookmarks, paste-preview.
-**hellosverre's suite:** skins, redgreen, smart-compact, mod-store.
+**hellosverre's suite:** skins, redgreen, mod-store.
 
 ## 1. skins
 
@@ -50,7 +50,10 @@ The powerline band above the prompt, locked to Catppuccin Mocha. Six blocks — 
 diff count, tree, bookmarks and context usage. Each block opens its plugin's pane at
 once, mid-turn, without leaving a line in the conversation. The band is thin by design:
 the panes belong to find-model, filetree, session-meter, after and transcript-bookmarks,
-which it declares as dependencies.
+which it declares as dependencies. A press calls a tiny `open()` bridge each companion
+exposes, so the pane is opened by its own plugin — instant and correctly drawn,
+sidestepping the cross-plugin blank-pane regression (anthropics/claude-code#110615) —
+rather than a queued slash command.
 
 By [Linxuan](https://github.com/linxuan-sys). Original to this marketplace.
 
@@ -156,18 +159,7 @@ run only updates the status line, so the pane stays out of the way.
 
 Upstream: [hellosverre/redgreen](https://github.com/hellosverre/redgreen) (MIT).
 
-## 12. smart-compact
-
-![smart-compact](docs/smart-compact.png)
-
-Offers compaction at the right moment instead of when the context is already full: after
-a commit or green tests, before the prompt cache expires, or when Claude itself says it
-is done with what came before. A dialog above the prompt shows what the summary must
-keep; you press Compact when you agree.
-
-Upstream: [hellosverre/smart-compact](https://github.com/hellosverre/smart-compact) (MIT).
-
-## 13. mod-store
+## 12. mod-store
 
 ![mod-store](docs/mod-store.png)
 
@@ -199,7 +191,6 @@ claude plugin install session-meter@cc-skin-pro
 claude plugin install after@cc-skin-pro
 claude plugin install transcript-bookmarks@cc-skin-pro
 claude plugin install redgreen@cc-skin-pro
-claude plugin install smart-compact@cc-skin-pro
 claude plugin install mod-store@cc-skin-pro
 ```
 
@@ -207,14 +198,14 @@ Run `/reload-plugins` afterwards, or restart Claude Code. `skins` is installed f
 because transcript-bookmarks and paste-preview depend on it; `cc-band-pro` declares its
 five companion plugins as dependencies, and Claude Code installs those with it.
 
-Claude Code 2.1.306 or newer is recommended — filetree needs it, smart-compact needs
-2.1.295, redgreen 2.1.293, and skins 2.1.287.
+Claude Code 2.1.306 or newer is recommended — filetree needs it, redgreen 2.1.293,
+and skins 2.1.287.
 
 ## Credits
 
 This marketplace stands on the work of its upstream authors. Thank you to:
 
-- [hellosverre](https://github.com/hellosverre) for skins, redgreen, smart-compact and mod-store;
+- [hellosverre](https://github.com/hellosverre) for skins, redgreen and mod-store;
 - [Kurt Buhler](https://github.com/data-goblin) for claude-code-filetree;
 - [Mehmet Aras](https://github.com/arasovic) for session-meter;
 - [Miguel Ángel Durán](https://github.com/midudev) for better-claude (after);
@@ -228,13 +219,13 @@ Each plugin keeps the license its upstream gave it: MIT, except transcript-bookm
 
 # 中文说明
 
-一个精挑细选的 Claude Code 插件商店：**skins** 皮肤引擎、**cc-band-pro** powerline 横幅，以及让它们好用的那些面板和工具——起始页、文件树、模型选择器、上下文与用量、提示词队列、书签、测试结果、智能压缩和 mod 商店。
+一个精挑细选的 Claude Code 插件商店：**skins** 皮肤引擎、**cc-band-pro** powerline 横幅，以及让它们好用的那些面板和工具——起始页、文件树、模型选择器、上下文与用量、提示词队列、书签、测试结果和 mod 商店。
 
 这里的插件有的由本站原创，有的是社区插件的 fork，其余是 hellosverre 的套件。收进同一个商店，装齐就是一套完整环境。fork 不是换个皮：依赖 ID 都指向这个商店，加载顺序已经解决（transcript-bookmarks 和 paste-preview 排在 skins 前面，避免被皮肤的整行钩子吞掉；band 把它的伙伴声明为依赖），面板之间不会抢同一个位置；每个都对照上游版本跟踪，更新是有意为之，不会悄悄漂移。
 
 **本站原创：** cc-band-pro、find-model、cc-dsh-like、sidebar-clear。
 **本地 fork：** filetree、session-meter、after、transcript-bookmarks、paste-preview。
-**hellosverre 套件：** skins、redgreen、smart-compact、mod-store。
+**hellosverre 套件：** skins、redgreen、mod-store。
 
 ## 1. skins
 
@@ -251,7 +242,7 @@ Each plugin keeps the license its upstream gave it: MIT, except transcript-bookm
 ![cc-band-pro](docs/cc-band-pro-idle.png)
 ![cc-band-pro 运行中](docs/cc-band-pro-runing.png)
 
-输入框上方的 powerline 横幅，锁定 Catppuccin Mocha。六个块——思考（终端支持图片时是螃蟹，否则是 Claude 图标）、模型、diff 数量、文件树、书签和上下文用量。每个块点一下就会在回合中立刻打开对应插件的面板，不往对话里留一行字。横幅本身很薄：面板属于 find-model、filetree、session-meter、after 和 transcript-bookmarks，它们被声明为依赖。
+输入框上方的 powerline 横幅，锁定 Catppuccin Mocha。六个块——思考（终端支持图片时是螃蟹，否则是 Claude 图标）、模型、diff 数量、文件树、书签和上下文用量。每个块点一下就会在回合中立刻打开对应插件的面板，不往对话里留一行字。横幅本身很薄：面板属于 find-model、filetree、session-meter、after 和 transcript-bookmarks，它们被声明为依赖。点击调用每个伙伴暴露的一个小 `open()` 桥，由面板自己的插件打开——立刻且渲染正确，绕开跨插件开面板空白的回归（anthropics/claude-code#110615）——而不是排队的斜杠命令。
 
 作者：[Linxuan](https://github.com/linxuan-sys)。本站原创。
 
@@ -327,15 +318,7 @@ Claude 跑测试时，失败会落到对话旁边的面板里：失败测试的�
 
 上游：[hellosverre/redgreen](https://github.com/hellosverre/redgreen)（MIT）。
 
-## 12. smart-compact
-
-![smart-compact](docs/smart-compact.png)
-
-在合适的时机建议压缩，而不是等上下文真的塞满：提交或测试全绿之后、提示词缓存过期之前，或者 Claude 自己表示前一段工作已经结束时。输入框上方会弹出对话框，写明摘要必须保留什么；你按 Compact 才执行。
-
-上游：[hellosverre/smart-compact](https://github.com/hellosverre/smart-compact)（MIT）。
-
-## 13. mod-store
+## 12. mod-store
 
 ![mod-store](docs/mod-store.png)
 
@@ -365,19 +348,18 @@ claude plugin install session-meter@cc-skin-pro
 claude plugin install after@cc-skin-pro
 claude plugin install transcript-bookmarks@cc-skin-pro
 claude plugin install redgreen@cc-skin-pro
-claude plugin install smart-compact@cc-skin-pro
 claude plugin install mod-store@cc-skin-pro
 ```
 
 装完跑 `/reload-plugins`，或者重启 Claude Code。skins 放在第一条，因为 transcript-bookmarks 和 paste-preview 依赖它；cc-band-pro 声明了五个伙伴插件作为依赖，装它会一并装上。
 
-建议 Claude Code 2.1.306 或更新——filetree 需要它，smart-compact 需要 2.1.295，redgreen 需要 2.1.293，skins 需要 2.1.287。
+建议 Claude Code 2.1.306 或更新——filetree 需要它，redgreen 需要 2.1.293，skins 需要 2.1.287。
 
 ## 致谢
 
 这个商店站在上游作者们的肩膀上，感谢：
 
-- [hellosverre](https://github.com/hellosverre)——skins、redgreen、smart-compact、mod-store；
+- [hellosverre](https://github.com/hellosverre)——skins、redgreen、mod-store；
 - [Kurt Buhler](https://github.com/data-goblin)——claude-code-filetree；
 - [Mehmet Aras](https://github.com/arasovic)——session-meter；
 - [Miguel Ángel Durán](https://github.com/midudev)——better-claude（after）；

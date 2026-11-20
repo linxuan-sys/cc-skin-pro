@@ -45,3 +45,9 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    bookmarks: { open: () => Promise<void> }
+  }
+}
