@@ -20,13 +20,26 @@ click away from the plugin that owns its pane.
 ## What it needs
 
 - **A Nerd Font** in the terminal, for the powerline caps and the icons.
-- **find-model**, **filetree**, **session-meter**, **after** and **transcript-bookmarks**,
-  for the model, tree, usage, thinking and marks blocks. cc-band-pro only opens their panes, so each
-  stays in, and is kept up in, its own plugin. A block whose plugin is off says
-  so in a toast.
+- **find-model**, **filetree**, **session-meter**, **after**, **transcript-bookmarks** and
+  **pi** — optional. Each block opens its own plugin's pane; cc-band-pro only asks for
+  it, so a block whose plugin is missing still draws, and a press does nothing at all.
 - The crab's two pictures ship in `assets/`; a terminal with the image protocol
   (kitty, Ghostty, iTerm2 3.5+) draws one in the thinking block, and elsewhere
   the block wears the Claude glyph instead.
+
+## The Pi block
+
+The last block, ` pi` (peach), opens the Pi output pane. That pane belongs to a
+separate plugin, **pi**, which cc-band-pro does not depend on.
+
+Install it from its own marketplace:
+
+```bash
+claude plugin marketplace add linxuan-sys/cc-pi-team
+claude plugin install pi@cc-pi-team
+```
+
+Without that plugin the block still draws, and a press does nothing at all.
 
 ## How it lives with the other bands
 

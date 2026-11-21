@@ -16,6 +16,7 @@ const BLOCKS: readonly Paint[] = [
   { bg: '#89b4fa', fg: '#11111b' }, // blue: tree
   { bg: '#585b70', fg: '#cdd6f4' }, // surface2: bookmarks
   { bg: '#313244', fg: '#cdd6f4' }, // surface0: usage
+  { bg: '#fab387', fg: '#11111b' }, // peach: pi
 ]
 /** The shade the thinking block pulses to while Claude works (pink). */
 const PULSE = '#f5c2e7'
@@ -32,7 +33,7 @@ const DANGER: Paint = { bg: '#f38ba8', fg: '#11111b' } // red
 const POWERLINE = { open: '\ue0b6', arrow: '\ue0b0', close: '\ue0b4' }
 
 /** Nerd Font icons, at code points every Nerd Font shares. */
-const ICONS = { claude: '\uec82', model: '\uf2db', diff: '\uf440', tree: '\uf07b', bookmark: '\uf02e', context: '\uf1c0' } as const
+const ICONS = { claude: '\uec82', model: '\uf2db', diff: '\uf440', tree: '\uf07b', bookmark: '\uf02e', context: '\uf1c0', pi: '\u{F06A9}' } as const
 
 /**
  * The thinking block's pictures on terminals that draw one: the crab resting,
@@ -45,7 +46,7 @@ const CRAB_IMAGES = {
 } as const
 
 /** The icons as the words a button's label uses, where a surface draws labels (Desktop, VS Code). */
-const ICON_WORDS: Readonly<Record<string, string>> = { [ICONS.diff]: '±', [ICONS.context]: 'ctx' }
+const ICON_WORDS: Readonly<Record<string, string>> = { [ICONS.diff]: '±', [ICONS.context]: 'ctx', [ICONS.pi]: 'pi' }
 
 /** The spinner beside the crab while a turn runs, and how often it moves. */
 const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
@@ -60,7 +61,7 @@ const MODEL_CELLS = 18
 const MAX_LEVEL = 4
 
 /** What a press on a block runs; the thinking block's opens the After queue. */
-export type BarPress = 'after' | 'model' | 'diff' | 'tree' | 'mark' | 'usage'
+export type BarPress = 'after' | 'model' | 'diff' | 'tree' | 'mark' | 'usage' | 'pi'
 
 export type Pill = {
   key: string
@@ -217,15 +218,17 @@ const barPills = (input: BarInput, level: number, crab?: { idle: string; typing:
             press: 'after',
           },
     { key: 'model', text: `${ICONS.model} ${model}${effort}`, isBold: true, press: 'model' },
-    { key: 'diff', text: `${ICONS.diff} diff${input.diffCount > 0 ? ` ${input.diffCount}` : ''}`, press: 'diff' },
-    { key: 'tree', text: `${ICONS.tree} tree`, press: 'tree' },
-    { key: 'mark', text: `${ICONS.bookmark} marks`, press: 'mark' },
+    { key: 'diff', text: `${ICONS.diff} diff${input.diffCount > 0 ? ` ${input.diffCount}` : ''}`, isBold: true, press: 'diff' },
+    { key: 'tree', text: `${ICONS.tree} tree`, isBold: true, press: 'tree' },
+    { key: 'mark', text: `${ICONS.bookmark} marks`, isBold: true, press: 'mark' },
     {
       key: 'usage',
       text: reading === '' ? ICONS.context : `${ICONS.context} ${reading}`,
       alert: alertFor(percent),
+      isBold: true,
       press: 'usage',
     },
+    { key: 'pi', text: `${ICONS.pi} pi`, isBold: true, press: 'pi' },
   ]
   const isPulsing = isWorking && Math.floor(frame / 4) % 2 === 1
 

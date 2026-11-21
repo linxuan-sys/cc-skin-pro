@@ -59,7 +59,7 @@ const sniffGraphics = async ($: EngineInterface): Promise<void> => {
  */
 type Pane = { id: string; title: string | ((cwd: string) => string); focus?: boolean; closeOnEscape?: boolean }
 type Target = { command: string; plugin: string; pane?: Pane }
-const TARGETS: Readonly<Record<Exclude<BarPress, 'diff'>, Target>> = {
+const TARGETS: Readonly<Record<Exclude<BarPress, 'diff' | 'pi'>, Target>> = {
   // Each of these keeps the state its pane draws from, so opening it by its id
   // comes up whole without the command: find-model reads its list in at
   // session.start, filetree keeps its tree following the cwd, session-meter
@@ -178,7 +178,7 @@ const setUp = async ($: EngineInterface) => {
  * mid-turn: the pane stays owned and drawn by its plugin (#110615), and no
  * command is queued. A plugin that is off says so.
  */
-const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff'>) => {
+const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff' | 'pi'>) => {
   const open = {
     after: () => $.after.open(),
     model: () => $.findModel.open(),
@@ -186,10 +186,14 @@ const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff'>) => {
     mark: () => $.bookmarks.open(),
     usage: () => $.sessionMeter.open(),
   }[press]
-  void open().catch((error: unknown) => {
-    const why = error instanceof Error ? error.message : String(error)
-    $.ui.toast(`${TARGETS[press].plugin} pane did not open (is it on?): ${why}`)
-  })
+  try {
+    void open().catch((error: unknown) => {
+      const why = error instanceof Error ? error.message : String(error)
+      $.ui.toast(`${TARGETS[press].plugin} pane did not open (is it on?): ${why}`)
+    })
+  } catch {
+    // 对应插件没装：$.after / $.filetree 之类不存在，静默无反应
+  }
 }
 
 /** Opens the diff pane on the last turn's edits, at the first step; a surface that cannot seat it says so in a toast. */
@@ -211,7 +215,24 @@ const onBarPress = ($: EngineInterface, press: BarPress) => {
 
     return
   }
+  if (press === 'pi') {
+    void openPi($).catch(() => undefined)
+
+    return
+  }
   openBridged($, press)
+}
+
+/**
+ * Opens the Pi output pane, which the pi plugin draws. This plugin does not
+ * depend on it: when it is not installed, the press does nothing at all.
+ */
+const openPi = async ($: EngineInterface): Promise<void> => {
+  try {
+    await $.pi.open()
+  } catch {
+    // pi 插件没装时 $.pi 不存在：什么都不做
+  }
 }
 
 /** A path under the session's folder as relative to it; any other as it is. */

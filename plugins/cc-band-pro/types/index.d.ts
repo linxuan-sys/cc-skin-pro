@@ -29,3 +29,10 @@ declare module 'claude-code' {
     }
   }
 }
+
+declare module 'claude-code' {
+  interface EngineInterface {
+    /** The pi plugin's bridge; absent when that plugin is not installed. */
+    pi: { open: () => Promise<void> }
+  }
+}
