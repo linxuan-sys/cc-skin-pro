@@ -15,8 +15,8 @@ const BLOCKS: readonly Paint[] = [
   { bg: '#74c7ec', fg: '#11111b' }, // sapphire: diff
   { bg: '#89b4fa', fg: '#11111b' }, // blue: tree
   { bg: '#b4befe', fg: '#11111b' }, // lavender: bookmarks
-  { bg: '#313244', fg: '#cdd6f4' }, // surface0: usage
-  { bg: '#585b70', fg: '#cdd6f4' }, // surface2: pi, the old marks shade
+  { bg: '#cba6f7', fg: '#11111b' }, // mauve: usage until a reading
+  { bg: '#9d7bd8', fg: '#11111b' }, // violet: pi, deeper end of the gradient
 ]
 /** The shade the thinking block pulses to while Claude works (pink). */
 const PULSE = '#f5c2e7'
