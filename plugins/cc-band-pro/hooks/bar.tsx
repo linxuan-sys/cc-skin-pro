@@ -16,7 +16,7 @@ const BLOCKS: readonly Paint[] = [
   { bg: '#89b4fa', fg: '#11111b' }, // blue: tree
   { bg: '#b4befe', fg: '#11111b' }, // lavender: bookmarks
   { bg: '#313244', fg: '#cdd6f4' }, // surface0: usage
-  { bg: '#2a2a3c', fg: '#cdd6f4' }, // Catppuccin Mocha base, lightened one step: pi
+  { bg: '#585b70', fg: '#cdd6f4' }, // surface2: pi, the old marks shade
 ]
 /** The shade the thinking block pulses to while Claude works (pink). */
 const PULSE = '#f5c2e7'
