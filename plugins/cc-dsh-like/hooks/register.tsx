@@ -171,6 +171,8 @@ let isCute = false
 let skillNames: readonly string[] = []
 /** False until the reveal: the row shows Clawd until then. */
 let imageReady = false
+/** False in tmux/editor terminals: the row keeps Clawd after the reveal too. */
+let hasGraphics = true
 /** True for BLINK_MS: the fallback draws the shut-eye frame. */
 let clawdBlink = false
 /** Bumped per session.start: timers of an earlier session (a view-switch replay)
@@ -184,6 +186,10 @@ export const register: Register = on => {
     imageReady = false
     clawdBlink = false
     isCute = false
+    const tmux = await $.env.get('TMUX')
+    const nvim = await $.env.get('NVIM')
+    const vimTerminal = await $.env.get('VIM_TERMINAL')
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
     // Blink and the reveal are one causal chain: the last blink's end callback grows
     // the reveal, so whenever the eyes blinked the picture must follow.
     const reveal = (): void => {
@@ -276,7 +282,7 @@ export const register: Register = on => {
       columns = Math.max(1, Math.min(columns0, Math.round(rows / ROWS_PER_COLUMN)))
     }
 
-    const portrait = imageReady ? (
+    const portrait = imageReady && hasGraphics ? (
       <Box key="claude-girl-column" flexDirection="column" alignItems="center" flexShrink={0}>
         <Box key="claude-girl-stack" width={columns} height={rows}>
           <Image
@@ -284,7 +290,7 @@ export const register: Register = on => {
             source={{ file: isCute ? cuteFile as string : normalFile as string, format: 'png' }}
             columns={columns}
             rows={rows}
-            alt="Claude girl"
+            alt=" "
           />
           <Box key="poke-layer" position="absolute" top={0} left={0}>
             <Client key={POKE_KEY} module="./poke.tsx" width={columns} height={rows} />

@@ -313,7 +313,7 @@ export const drawPowerline = (
                 source={{ png: picture.png }}
                 columns={picture.columns}
                 rows={picture.rows}
-                alt={picture.alt}
+                alt=" "
               />
               {press !== undefined && Button !== undefined ? (
                 <Button
