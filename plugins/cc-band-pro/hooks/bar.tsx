@@ -70,7 +70,7 @@ export type Pill = {
   isBold?: boolean
   press?: BarPress
   /** A picture drawn in place of the icon, where the terminal can show one. */
-  image?: { png: string; columns: number; rows: number; alt: string }
+  image?: { png: string; columns: number; rows: number }
   /** The cells the block takes, padding included, when a picture replaces the text's start. */
   width?: number
 }
@@ -205,7 +205,7 @@ const barPills = (input: BarInput, level: number, crab?: { idle: string; typing:
             key: 'thinking',
             text: FRAMES[frame % FRAMES.length] ?? '',
             width: CRAB_IMAGES.typing.columns + 4,
-            image: { png: crab.typing, ...CRAB_IMAGES.typing, alt: ICONS.claude },
+            image: { png: crab.typing, ...CRAB_IMAGES.typing },
             isBold: true,
             press: 'after',
           }
@@ -213,7 +213,7 @@ const barPills = (input: BarInput, level: number, crab?: { idle: string; typing:
             key: 'thinking',
             text: '',
             width: CRAB_IMAGES.idle.columns + 3,
-            image: { png: crab.idle, ...CRAB_IMAGES.idle, alt: ICONS.claude },
+            image: { png: crab.idle, ...CRAB_IMAGES.idle },
             isBold: true,
             press: 'after',
           },

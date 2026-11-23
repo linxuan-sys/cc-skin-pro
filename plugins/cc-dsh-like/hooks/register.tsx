@@ -172,7 +172,7 @@ let skillNames: readonly string[] = []
 /** False until the reveal: the row shows Clawd until then. */
 let imageReady = false
 /** False in tmux/editor terminals: the row keeps Clawd after the reveal too. */
-let hasGraphics = true
+let hasGraphics = false
 /** True for BLINK_MS: the fallback draws the shut-eye frame. */
 let clawdBlink = false
 /** Bumped per session.start: timers of an earlier session (a view-switch replay)
@@ -181,15 +181,24 @@ let epoch = 0
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
+    const tmux = await $.env.get('TMUX')
+    const nvim = await $.env.get('NVIM')
+    const vimTerminal = await $.env.get('VIM_TERMINAL')
+    const term = await $.env.get('TERM')
+    const termProgram = await $.env.get('TERM_PROGRAM')
+    hasGraphics =
+      tmux === undefined &&
+      nvim === undefined &&
+      vimTerminal === undefined &&
+      (term === 'xterm-kitty' ||
+        term === 'xterm-ghostty' ||
+        termProgram === 'kitty' ||
+        termProgram === 'ghostty')
     epoch += 1
     const mine = epoch
     imageReady = false
     clawdBlink = false
     isCute = false
-    const tmux = await $.env.get('TMUX')
-    const nvim = await $.env.get('NVIM')
-    const vimTerminal = await $.env.get('VIM_TERMINAL')
-    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
     // Blink and the reveal are one causal chain: the last blink's end callback grows
     // the reveal, so whenever the eyes blinked the picture must follow.
     const reveal = (): void => {
