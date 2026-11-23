@@ -172,7 +172,7 @@ let skillNames: readonly string[] = []
 /** False until the reveal: the row shows Clawd until then. */
 let imageReady = false
 /** False in tmux/editor terminals: the row keeps Clawd after the reveal too. */
-let hasGraphics = false
+let hasGraphics = true
 /** True for BLINK_MS: the fallback draws the shut-eye frame. */
 let clawdBlink = false
 /** Bumped per session.start: timers of an earlier session (a view-switch replay)
@@ -184,16 +184,7 @@ export const register: Register = on => {
     const tmux = await $.env.get('TMUX')
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
-    const term = await $.env.get('TERM')
-    const termProgram = await $.env.get('TERM_PROGRAM')
-    hasGraphics =
-      tmux === undefined &&
-      nvim === undefined &&
-      vimTerminal === undefined &&
-      (term === 'xterm-kitty' ||
-        term === 'xterm-ghostty' ||
-        termProgram === 'kitty' ||
-        termProgram === 'ghostty')
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
     epoch += 1
     const mine = epoch
     imageReady = false

@@ -44,7 +44,7 @@ const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: str
  * not drawn into a host that eats it. Everywhere else the engine's alt fallback
  * has the last word.
  */
-let hasGraphics = false
+let hasGraphics = true
 
 /**
  * What a press on a block runs: another plugin's own slash command, exactly as
@@ -286,16 +286,7 @@ export const register: Register = on => {
     const tmux = await $.env.get('TMUX')
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
-    const term = await $.env.get('TERM')
-    const termProgram = await $.env.get('TERM_PROGRAM')
-    hasGraphics =
-      tmux === undefined &&
-      nvim === undefined &&
-      vimTerminal === undefined &&
-      (term === 'xterm-kitty' ||
-        term === 'xterm-ghostty' ||
-        termProgram === 'kitty' ||
-        termProgram === 'ghostty')
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
     await setUp($).catch(() => undefined)
 
     return next(e)
