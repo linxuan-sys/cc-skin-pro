@@ -45,12 +45,6 @@ const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: str
  * has the last word.
  */
 let hasGraphics = true
-const sniffGraphics = async ($: EngineInterface): Promise<void> => {
-  const tmux = await $.env.get('TMUX')
-  const nvim = await $.env.get('NVIM')
-  const vimTerminal = await $.env.get('VIM_TERMINAL')
-  hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
-}
 
 /**
  * What a press on a block runs: another plugin's own slash command, exactly as
@@ -289,7 +283,10 @@ const stepsFor = async ($: EngineInterface, e: Record<string, unknown>): Promise
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    await sniffGraphics($)
+    const tmux = await $.env.get('TMUX')
+    const nvim = await $.env.get('NVIM')
+    const vimTerminal = await $.env.get('VIM_TERMINAL')
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
     await setUp($).catch(() => undefined)
 
     return next(e)
