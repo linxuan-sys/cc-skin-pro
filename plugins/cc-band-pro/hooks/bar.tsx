@@ -11,12 +11,12 @@ export type Paint = { bg: string; fg: string }
  */
 const BLOCKS: readonly Paint[] = [
   { bg: '#f2e9fd', fg: '#11111b' }, // pale lavender: the thinking block
-  { bg: '#94e2d5', fg: '#11111b' }, // teal: the model
-  { bg: '#b4befe', fg: '#11111b' }, // lavender: diff
+  { bg: '#89dceb', fg: '#11111b' }, // sky: the model
+  { bg: '#74c7ec', fg: '#11111b' }, // sapphire: diff
   { bg: '#89b4fa', fg: '#11111b' }, // blue: tree
-  { bg: '#585b70', fg: '#cdd6f4' }, // surface2: bookmarks
+  { bg: '#b4befe', fg: '#11111b' }, // lavender: bookmarks
   { bg: '#313244', fg: '#cdd6f4' }, // surface0: usage
-  { bg: '#cba6f7', fg: '#11111b' }, // macaron mauve: pi
+  { bg: '#2a2a3c', fg: '#cdd6f4' }, // Catppuccin Mocha base, lightened one step: pi
 ]
 /** The shade the thinking block pulses to while Claude works (pink). */
 const PULSE = '#f5c2e7'
