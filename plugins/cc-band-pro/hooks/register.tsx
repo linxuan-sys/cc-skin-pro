@@ -45,6 +45,7 @@ const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: str
  * has the last word.
  */
 let hasGraphics = true
+let bandOn: boolean | undefined
 
 /**
  * What a press on a block runs: another plugin's own slash command, exactly as
@@ -283,13 +284,28 @@ const stepsFor = async ($: EngineInterface, e: Record<string, unknown>): Promise
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    const tmux = await $.env.get('TMUX')
+    await $.command.register({
+      name: 'band',
+      description: 'Show or hide the status band',
+      argumentHint: 'on | off',
+      immediate: true,
+    })
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
-    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
+    hasGraphics = nvim === undefined && vimTerminal === undefined
     await setUp($).catch(() => undefined)
 
     return next(e)
+  })
+
+  on('command.run', { command: 'band' }, ($, e) => {
+    const arg = e.args.trim().toLowerCase()
+    if (arg !== 'on' && arg !== 'off') {
+      return { text: 'Usage: /band on | off' }
+    }
+    bandOn = arg === 'on'
+    $.ui.invalidate('ui.render')
+    return { text: `band ${arg}` }
   })
 
   // A /clear or a resume ends this session: the host empties every plugin's $.state with it (these atoms included,
@@ -401,6 +417,9 @@ export const register: Register = on => {
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const below = await next(e)
     if (e.props.hasSurvey) {
+      return below
+    }
+    if (!(bandOn ?? hasGraphics)) {
       return below
     }
     const elements = $.ui.resolve(e)

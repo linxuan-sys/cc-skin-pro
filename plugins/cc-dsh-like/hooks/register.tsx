@@ -314,6 +314,9 @@ export const register: Register = on => {
             {row}
           </Text>
         ))}
+        <Box key="clawd-poke-layer" position="absolute" top={0} left={0}>
+          <Client key={POKE_KEY} module="./poke.tsx" width={columns} height={rows} />
+        </Box>
       </Box>
     )
 
@@ -424,6 +427,20 @@ export const register: Register = on => {
 
     const data = e.data as { poke?: unknown } | undefined
     if (data === undefined || data === null || data.poke !== true) return next(e)
+
+    if (!imageReady || !hasGraphics) {
+      if (clawdBlink) return next(e)
+      clawdBlink = true
+      $.ui.invalidate('ui.render')
+      const mine = epoch
+      $.clock.after(BLINK_MS, () => {
+        if (mine !== epoch) return
+        clawdBlink = false
+        $.ui.invalidate('ui.render')
+      })
+      return next(e)
+    }
+
     if (isCute) return next(e)
 
     isCute = true
