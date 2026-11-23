@@ -16,7 +16,7 @@ const BLOCKS: readonly Paint[] = [
   { bg: '#89b4fa', fg: '#11111b' }, // blue: tree
   { bg: '#585b70', fg: '#cdd6f4' }, // surface2: bookmarks
   { bg: '#313244', fg: '#cdd6f4' }, // surface0: usage
-  { bg: '#fab387', fg: '#11111b' }, // peach: pi
+  { bg: '#cba6f7', fg: '#11111b' }, // macaron mauve: pi
 ]
 /** The shade the thinking block pulses to while Claude works (pink). */
 const PULSE = '#f5c2e7'
