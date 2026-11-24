@@ -171,7 +171,7 @@ let isCute = false
 let skillNames: readonly string[] = []
 /** False until the reveal: the row shows Clawd until then. */
 let imageReady = false
-/** False in tmux/editor terminals: the row keeps Clawd after the reveal too. */
+/** False outside kitty/Ghostty and in tmux/editor terminals: the row keeps Clawd. */
 let hasGraphics = true
 /** True for BLINK_MS: the fallback draws the shut-eye frame. */
 let clawdBlink = false
@@ -184,7 +184,14 @@ export const register: Register = on => {
     const tmux = await $.env.get('TMUX')
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
-    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined
+    const term = await $.env.get('TERM')
+    const termProgram = await $.env.get('TERM_PROGRAM')
+    const kittyOrGhostty =
+      term === 'xterm-kitty' ||
+      term === 'xterm-ghostty' ||
+      termProgram === 'kitty' ||
+      termProgram === 'ghostty'
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined && kittyOrGhostty
     epoch += 1
     const mine = epoch
     imageReady = false

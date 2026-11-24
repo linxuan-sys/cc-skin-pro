@@ -38,13 +38,9 @@ const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: str
   return crabPngs
 }
 
-/**
- * Hosts a terminal's graphics escapes never pass through — tmux, an editor's
- * `:terminal` — sniffed once per session from the environment, so the crab is
- * not drawn into a host that eats it. Everywhere else the engine's alt fallback
- * has the last word.
- */
+/** `hasGraphics` keeps the band visible; `imageCapable` is the kitty/Ghostty-only gate for the crab. */
 let hasGraphics = true
+let imageCapable = false
 let bandOn: boolean | undefined
 
 /**
@@ -290,9 +286,19 @@ export const register: Register = on => {
       argumentHint: 'on | off',
       immediate: true,
     })
+    const tmux = await $.env.get('TMUX')
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
+    const term = await $.env.get('TERM')
+    const termProgram = await $.env.get('TERM_PROGRAM')
     hasGraphics = nvim === undefined && vimTerminal === undefined
+    imageCapable =
+      hasGraphics &&
+      tmux === undefined &&
+      (term === 'xterm-kitty' ||
+        term === 'xterm-ghostty' ||
+        termProgram === 'kitty' ||
+        termProgram === 'ghostty')
     await setUp($).catch(() => undefined)
 
     return next(e)
@@ -425,7 +431,7 @@ export const register: Register = on => {
     const elements = $.ui.resolve(e)
     // The thinking block draws the crab where the surface offers pictures and
     // no escape-eating host wraps the terminal; elsewhere it keeps the glyph.
-    const crab = hasGraphics && 'Image' in elements ? await readCrab($) : undefined
+    const crab = imageCapable && 'Image' in elements ? await readCrab($) : undefined
     const pills = fitPills(
       {
         usage: await read($, usageAtom),
