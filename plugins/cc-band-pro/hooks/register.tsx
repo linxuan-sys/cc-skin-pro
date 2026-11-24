@@ -44,39 +44,15 @@ let imageCapable = false
 let bandOn: boolean | undefined
 
 /**
- * What a press on a block runs: another plugin's own slash command, exactly as
- * if it were typed, so each pane is kept in its own plugin. The diff block is
- * the one that opens this plugin's own pane.
+ * The plugin each block opens through its bridge; the diff block opens this
+ * plugin's own replay pane.
  */
-type Pane = { id: string; title: string | ((cwd: string) => string); focus?: boolean; closeOnEscape?: boolean }
-type Target = { command: string; plugin: string; pane?: Pane }
-const TARGETS: Readonly<Record<Exclude<BarPress, 'diff' | 'pi'>, Target>> = {
-  // Each of these keeps the state its pane draws from, so opening it by its id
-  // comes up whole without the command: find-model reads its list in at
-  // session.start, filetree keeps its tree following the cwd, session-meter
-  // keeps its reading from session.measure, after its queue in state, and
-  // transcript-bookmarks its list from $.store at session.start.
-  after: {
-    command: 'after',
-    plugin: 'after',
-    pane: { id: 'after', title: 'After', focus: true, closeOnEscape: true },
-  },
-  model: {
-    command: 'find-model',
-    plugin: 'find-model',
-    pane: { id: 'find-model', title: 'Find model', focus: true, closeOnEscape: true },
-  },
-  tree: {
-    command: 'filetree',
-    plugin: 'filetree',
-    pane: { id: 'filetree', title: cwd => `Files: ${cwd.split('/').pop() || cwd}`, focus: true },
-  },
-  mark: {
-    command: 'bookmarks',
-    plugin: 'transcript-bookmarks',
-    pane: { id: 'bookmarks', title: 'Bookmarks', focus: true, closeOnEscape: true },
-  },
-  usage: { command: 'ctx', plugin: 'session-meter', pane: { id: 'ctx', title: 'Session' } },
+const TARGETS: Readonly<Record<Exclude<BarPress, 'diff' | 'pi'>, string>> = {
+  after: 'after',
+  model: 'find-model',
+  tree: 'filetree',
+  mark: 'transcript-bookmarks',
+  usage: 'session-meter',
 }
 
 /** The friendly names the settings' modelPicker gives the models, read as a session starts. */
@@ -180,7 +156,7 @@ const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff' | 'pi'>
   try {
     void open().catch((error: unknown) => {
       const why = error instanceof Error ? error.message : String(error)
-      $.ui.toast(`${TARGETS[press].plugin} pane did not open (is it on?): ${why}`)
+      $.ui.toast(`${TARGETS[press]} pane did not open (is it on?): ${why}`)
     })
   } catch {
     // 对应插件没装：$.after / $.filetree 之类不存在，静默无反应
@@ -193,7 +169,10 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
   const opened = await $.ui.open({ id: DIFF_PANE, title: 'Diff', focus: true, closeOnEscape: true })
   if (!opened.isPlaced) {
     $.ui.toast(`Diff pane is waiting: ${opened.reason}`)
+
+    return
   }
+  await $.ui.focus({ requestId: DIFF_PANE, key: 'next' }).catch(() => undefined)
 }
 
 /**
@@ -286,6 +265,11 @@ export const register: Register = on => {
       argumentHint: 'on | off',
       immediate: true,
     })
+    await $.command.register({
+      name: 'replay',
+      description: 'Open the replay pane',
+      immediate: true,
+    })
     const tmux = await $.env.get('TMUX')
     const nvim = await $.env.get('NVIM')
     const vimTerminal = await $.env.get('VIM_TERMINAL')
@@ -312,6 +296,11 @@ export const register: Register = on => {
     bandOn = arg === 'on'
     $.ui.invalidate('ui.render')
     return { text: `band ${arg}` }
+  })
+
+  on('command.run', { command: 'replay' }, $ => {
+    void openDiff($).catch(() => undefined)
+    return { text: 'replay' }
   })
 
   // A /clear or a resume ends this session: the host empties every plugin's $.state with it (these atoms included,
@@ -462,8 +451,6 @@ export const register: Register = on => {
       {
         steps,
         index: await read($, diffIndexAtom),
-        columns: e.props.bodyColumns,
-        bodyRows: e.props.scroll.bodyRows,
       },
       {
         // clamped, so Next on the last step and Prev on the first stay put

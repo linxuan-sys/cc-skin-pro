@@ -5,17 +5,22 @@ themes, no picker, no settings: one band above the prompt, six blocks, each a
 click away from the plugin that owns its pane.
 
 ```
- 󰚩 ⠹  Opus 5.5 · high   diff 3   tree    marks   ●●○○○ · 213k 
+ 󰚩 ⠹  Opus 5.5 · high   replay 3   tree    marks   ●●○○○ · 213k 
 ```
 
 | Block | Shows | A click |
 | --- | --- | --- |
 | Thinking | The Claude glyph — or the crab's picture, on a terminal with the image protocol: at its laptop while Claude works, resting otherwise — with a spinner and a pink pulse while a turn runs | Opens the After queue pane (the `after` plugin) |
 | Model | The model's name (its `modelPicker` label where the settings give one) and the effort | Runs `/find-model` |
-| Diff | How many Edit, MultiEdit and Write calls the last turn made | Opens cc-band-pro's own Diff pane: step through each edit, `p`/`n`, Esc closes |
+| Replay | How many Edit, MultiEdit and Write calls the last turn made | Opens cc-band-pro's own Diff pane: step through each edit, `p`/`n`, `↑↓` scroll, `c` or Esc closes |
 | Tree | `tree` | Runs `/filetree` |
 | Marks | A bookmark icon | Opens the Bookmarks pane (the `transcript-bookmarks` plugin) |
 | Usage | The context meter and tokens; green to 30 %, yellow to 60 %, orange to 80 %, red past it | Runs `/ctx` |
+
+## Commands
+
+- `/band on` / `/band off` — show or hide the band for this session.
+- `/replay` — open the Diff pane on the last turn's edits.
 
 ## What it needs
 

@@ -1,7 +1,6 @@
 import type { RenderElement } from 'claude-code'
 
 import type { DiffLine, DiffStep } from '../types'
-import { cells } from './bar'
 import type { Elements } from './bar'
 
 /** The pane a press on the bar's diff block opens. */
@@ -35,34 +34,6 @@ const splitLines = (text: unknown): string[] => {
   }
 
   return lines
-}
-
-/** Keeps one line of context around each change, so a long file shows its changed lines, not all of it. */
-const trimContext = (lines: DiffLine[]): DiffLine[] => {
-  if (!lines.some(line => line.op !== ' ')) {
-    return lines
-  }
-  const keep = lines.map(
-    (line, k) =>
-      line.op !== ' ' ||
-      (lines[k - 1] !== undefined && lines[k - 1]!.op !== ' ') ||
-      (lines[k + 1] !== undefined && lines[k + 1]!.op !== ' '),
-  )
-  const out: DiffLine[] = []
-  let skipped = false
-  lines.forEach((line, k) => {
-    if (keep[k] === true) {
-      if (skipped && out.length > 0) {
-        out.push({ op: '~', t: '⋯' })
-      }
-      out.push(line)
-      skipped = false
-    } else {
-      skipped = true
-    }
-  })
-
-  return out
 }
 
 /**
@@ -108,7 +79,7 @@ export const diffLines = (oldText: unknown, newText: unknown): DiffLine[] => {
     j += 1
   }
 
-  return trimContext(out)
+  return out
 }
 
 const countChanges = (diff: readonly DiffLine[]) => {
@@ -125,10 +96,6 @@ const countChanges = (diff: readonly DiffLine[]) => {
 export type DiffView = {
   steps: readonly DiffStep[]
   index: number
-  /** Cells across the pane's body, for wrapping the estimate. */
-  columns: number
-  /** Rows the body may show, so a diff stops where the pane does. */
-  bodyRows: number
 }
 
 export type DiffActions = {
@@ -162,34 +129,19 @@ export const drawDiff = ({ Box, Text, Button }: Elements, view: DiffView, act: D
   const total = steps.length
   const k = Math.max(0, Math.min(view.index, total - 1))
   const step = steps[k]!
-  const width = Math.max(40, view.columns - 4)
-  const maxDiff = Math.max(4, view.bodyRows - 8)
   const { add, del } = countChanges(step.diff)
 
-  // Long lines wrap; maxDiff counts screen rows, estimated from the line's
-  // length, so a wrapped line uses up more of the budget.
-  const rows: RenderElement[] = []
-  let used = 0
-  let shown = 0
-  for (const line of step.diff) {
-    const full = `${line.op === '~' ? ' ' : line.op} ${line.t}`
-    const estimate = Math.max(1, Math.ceil(cells(full) / width))
-    if (used > 0 && used + estimate > maxDiff) {
-      break
-    }
+  const rows: RenderElement[] = step.diff.map((line, n) => {
+    const full = `${line.op} ${line.t}`
     const color = line.op === '+' ? COLORS.added : line.op === '-' ? COLORS.removed : undefined
-    rows.push(
-      <Text key={`d${shown}`} color={color} dimColor={line.op === ' ' || line.op === '~'} wrap="wrap">
+
+    return (
+      <Text key={`d${n}`} color={color} dimColor={line.op === ' '} wrap="wrap">
         {full}
-      </Text>,
+      </Text>
     )
-    used += estimate
-    shown += 1
-  }
-  if (step.diff.length > shown) {
-    rows.push(<Text key="more" color={COLORS.muted}>{`  … ${step.diff.length - shown} more lines`}</Text>)
-  }
-  if (shown === 0) {
+  })
+  if (rows.length === 0) {
     rows.push(<Text key="empty-diff" color={COLORS.muted}>{'  (no line changes)'}</Text>)
   }
 
@@ -230,7 +182,7 @@ export const drawDiff = ({ Box, Text, Button }: Elements, view: DiffView, act: D
         <Button key="close" label="Close" hotkey="c" onPress={act.close} />
       </Box>
       <Text key="hint" color={COLORS.muted} wrap="truncate-end">
-        {'↑↓ or the numbers walk the steps · p/n step · Esc closes'}
+        {'↑↓ scroll · p/n or the numbers step · c or Esc closes'}
       </Text>
     </Box>
   )

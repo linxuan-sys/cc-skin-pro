@@ -218,7 +218,7 @@ const barPills = (input: BarInput, level: number, crab?: { idle: string; typing:
             press: 'after',
           },
     { key: 'model', text: `${ICONS.model} ${model}${effort}`, isBold: true, press: 'model' },
-    { key: 'diff', text: `${ICONS.diff} diff${input.diffCount > 0 ? ` ${input.diffCount}` : ''}`, isBold: true, press: 'diff' },
+    { key: 'diff', text: `${ICONS.diff} replay${input.diffCount > 0 ? ` ${input.diffCount}` : ''}`, isBold: true, press: 'diff' },
     { key: 'tree', text: `${ICONS.tree} tree`, isBold: true, press: 'tree' },
     { key: 'mark', text: `${ICONS.bookmark} marks`, isBold: true, press: 'mark' },
     {
