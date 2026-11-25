@@ -3315,7 +3315,7 @@ export const register: Register = (on, options) => {
       noDock = true
       if (zjump.on) jumpClose($)
       await $.ui.close({ id: PANE }).catch(() => undefined)
-      return { text: 'File tree closed.' }
+      return {}
     }
     const terminal = await $.session.surfaces().then(s => s.includes('terminal'), () => true)
     if (terminal && !e.presentation.isFullscreen) return { text: 'filetree shows in the sidebar, which needs the fullscreen layout. Run /tui fullscreen, then /filetree.' }
@@ -3326,7 +3326,7 @@ export const register: Register = (on, options) => {
     follow = !arg
     const root = arg ? resolve(cwd, arg, home) : cwd
     await reset($, root, focusOnOpen || given !== '' || mine?.isPlaced === true)
-    return { text: `File tree on ${shortPath(root)}${follow ? ' (moves with the cwd)' : ''}.` }
+    return {}
   })
 
   on('tool.call', async ($, e, next) => {

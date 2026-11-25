@@ -44,15 +44,15 @@ let imageCapable = false
 let bandOn: boolean | undefined
 
 /**
- * The plugin each block opens through its bridge; the diff block opens this
- * plugin's own replay pane.
+ * The command each block runs; the diff block opens this plugin's own replay
+ * pane.
  */
 const TARGETS: Readonly<Record<Exclude<BarPress, 'diff' | 'pi'>, string>> = {
   after: 'after',
   model: 'find-model',
   tree: 'filetree',
-  mark: 'transcript-bookmarks',
-  usage: 'session-meter',
+  mark: 'bookmarks',
+  usage: 'ctx',
 }
 
 /** The friendly names the settings' modelPicker gives the models, read as a session starts. */
@@ -141,25 +141,17 @@ const setUp = async ($: EngineInterface) => {
 }
 
 /**
- * Opens a target's pane through that plugin's own bridge, synchronously and
- * mid-turn: the pane stays owned and drawn by its plugin (#110615), and no
- * command is queued. A plugin that is off says so.
+ * Runs a target's own command; the pane stays owned and drawn by its plugin.
+ * A plugin that is off says so.
  */
-const openBridged = ($: EngineInterface, press: Exclude<BarPress, 'diff' | 'pi'>) => {
-  const open = {
-    after: () => $.after.open(),
-    model: () => $.findModel.open(),
-    tree: () => $.filetree.open(),
-    mark: () => $.bookmarks.open(),
-    usage: () => $.sessionMeter.open(),
-  }[press]
+const runTarget = ($: EngineInterface, press: Exclude<BarPress, 'diff' | 'pi'>) => {
   try {
-    void open().catch((error: unknown) => {
+    void $.command.run({ command: TARGETS[press] }).catch((error: unknown) => {
       const why = error instanceof Error ? error.message : String(error)
       $.ui.toast(`${TARGETS[press]} pane did not open (is it on?): ${why}`)
     })
   } catch {
-    // 对应插件没装：$.after / $.filetree 之类不存在，静默无反应
+    // 对应插件没装：命令不存在，静默无反应
   }
 }
 
@@ -176,8 +168,8 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
 }
 
 /**
- * What a press on the bar does: the diff opens here at once, the rest open their
- * own plugin's pane through its bridge, mid-turn, with no line in the conversation.
+ * What a press on the bar does: the diff opens here at once, the rest run their
+ * own plugin's command.
  */
 const onBarPress = ($: EngineInterface, press: BarPress) => {
   if (press === 'diff') {
@@ -190,18 +182,17 @@ const onBarPress = ($: EngineInterface, press: BarPress) => {
 
     return
   }
-  openBridged($, press)
+  runTarget($, press)
 }
 
 /**
- * Opens the Pi output pane, which the pi plugin draws. This plugin does not
- * depend on it: when it is not installed, the press does nothing at all.
+ * Opens the Pi output pane by running the pi plugin's own command.
  */
 const openPi = async ($: EngineInterface): Promise<void> => {
   try {
-    await $.pi.open()
+    await $.command.run({ command: 'pi-pane' })
   } catch {
-    // pi 插件没装时 $.pi 不存在：什么都不做
+    // pi 插件没装时命令不存在：什么都不做
   }
 }
 
@@ -300,7 +291,7 @@ export const register: Register = on => {
 
   on('command.run', { command: 'replay' }, $ => {
     void openDiff($).catch(() => undefined)
-    return { text: 'replay' }
+    return {}
   })
 
   // A /clear or a resume ends this session: the host empties every plugin's $.state with it (these atoms included,

@@ -242,10 +242,10 @@ export const register: Register = on => {
       watch?.cancel()
       watch = null
       await $.ui.close({ id: PANE }).catch(() => undefined)
-      return { text: 'Find model closed.' }
+      return {}
     }
     const opened = await openPicker($)
-    return { text: opened.isPlaced ? 'Find model opened.' : `Find model pane is waiting: ${opened.reason}` }
+    return opened.isPlaced ? {} : { text: `Find model pane is waiting: ${opened.reason}` }
   })
 
   // The list's presses mark a row, a quick second press switches; its keys walk.

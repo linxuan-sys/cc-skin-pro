@@ -371,7 +371,7 @@ export const register: Register = (on, options) => {
   on('command.run', { command: 'ctx' }, async $ => {
     await refresh($).catch(() => undefined)
     const opened = await $.ui.open({ id: PANE, title: 'Session' })
-    return { text: opened.isPlaced ? 'Session pane opened.' : `Session pane is waiting: ${opened.reason}` }
+    return opened.isPlaced ? {} : { text: `Session pane is waiting: ${opened.reason}` }
   })
 
   on('session.measure', async ($, e, next) => {
