@@ -32,6 +32,12 @@ declare module 'claude-code' {
 
 declare module 'claude-code' {
   interface EngineInterface {
+    /** Companion bridges; each is absent when that plugin is not installed. */
+    after: { open: () => Promise<void> }
+    findModel: { open: () => Promise<void> }
+    filetree: { open: () => Promise<void> }
+    bookmarks: { open: () => Promise<void> }
+    sessionMeter: { open: () => Promise<void> }
     /** The pi plugin's bridge; absent when that plugin is not installed. */
     pi: { open: () => Promise<void> }
   }

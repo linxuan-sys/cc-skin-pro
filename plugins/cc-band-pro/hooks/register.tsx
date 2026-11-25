@@ -38,7 +38,7 @@ const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: str
   return crabPngs
 }
 
-/** `hasGraphics` keeps the band visible; `imageCapable` is the kitty/Ghostty-only gate for the crab. */
+/** `hasGraphics` keeps the band visible; `imageCapable` is the kitty/Ghostty/Herdr gate for the crab. */
 let hasGraphics = true
 let imageCapable = false
 let bandOn: boolean | undefined
@@ -140,19 +140,15 @@ const setUp = async ($: EngineInterface) => {
   }
 }
 
-/**
- * Runs a target's own command; the pane stays owned and drawn by its plugin.
- * A plugin that is off says so.
- */
-const runTarget = ($: EngineInterface, press: Exclude<BarPress, 'diff' | 'pi'>) => {
-  try {
-    void $.command.run({ command: TARGETS[press] }).catch((error: unknown) => {
-      const why = error instanceof Error ? error.message : String(error)
-      $.ui.toast(`${TARGETS[press]} pane did not open (is it on?): ${why}`)
-    })
-  } catch {
-    // 对应插件没装：命令不存在，静默无反应
-  }
+/** Windows Terminal and Herdr keep the session busy, so a plugin-run command queues forever there; fill it for Enter instead. */
+const needsMouseInput = async ($: EngineInterface): Promise<boolean> => {
+  const [wt, program] = await Promise.all([
+    $.env.get('WT_SESSION'),
+    $.env.get('TERM_PROGRAM'),
+  ])
+  const name = program?.toLowerCase()
+
+  return wt !== undefined || name === 'herdr' || name === 'windows_terminal'
 }
 
 /** Opens the diff pane on the last turn's edits, at the first step; a surface that cannot seat it says so in a toast. */
@@ -168,31 +164,48 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
 }
 
 /**
- * What a press on the bar does: the diff opens here at once, the rest run their
- * own plugin's command.
+ * What a press on the bar does: the diff opens here at once; in a terminal
+ * whose session never idles the command is filled for Enter, otherwise the
+ * target's bridge opens it now.
  */
 const onBarPress = ($: EngineInterface, press: BarPress) => {
+  void pressBar($, press).catch(() => undefined)
+}
+
+const pressBar = async ($: EngineInterface, press: BarPress): Promise<void> => {
   if (press === 'diff') {
-    void openDiff($).catch(() => undefined)
+    await openDiff($)
+
+    return
+  }
+  if (await needsMouseInput($)) {
+    await $.prompt.fill({ text: `/${press === 'pi' ? 'pi-pane' : TARGETS[press]}`, mode: 'replace' })
 
     return
   }
   if (press === 'pi') {
-    void openPi($).catch(() => undefined)
+    try {
+      await $.pi.open()
+    } catch {
+      // pi 插件没装：没有可开的 pane
+    }
 
     return
   }
-  runTarget($, press)
-}
-
-/**
- * Opens the Pi output pane by running the pi plugin's own command.
- */
-const openPi = async ($: EngineInterface): Promise<void> => {
   try {
-    await $.command.run({ command: 'pi-pane' })
+    if (press === 'after') {
+      await $.after.open()
+    } else if (press === 'model') {
+      await $.findModel.open()
+    } else if (press === 'tree') {
+      await $.filetree.open()
+    } else if (press === 'mark') {
+      await $.bookmarks.open()
+    } else {
+      await $.sessionMeter.open()
+    }
   } catch {
-    // pi 插件没装时命令不存在：什么都不做
+    // 对应插件没装：没有可开的 pane
   }
 }
 
@@ -266,14 +279,16 @@ export const register: Register = on => {
     const vimTerminal = await $.env.get('VIM_TERMINAL')
     const term = await $.env.get('TERM')
     const termProgram = await $.env.get('TERM_PROGRAM')
-    hasGraphics = nvim === undefined && vimTerminal === undefined
+    const editor = nvim !== undefined || vimTerminal !== undefined
+    hasGraphics = !editor && termProgram !== 'herdr'
     imageCapable =
-      hasGraphics &&
+      !editor &&
       tmux === undefined &&
       (term === 'xterm-kitty' ||
         term === 'xterm-ghostty' ||
         termProgram === 'kitty' ||
-        termProgram === 'ghostty')
+        termProgram === 'ghostty' ||
+        termProgram === 'herdr')
     await setUp($).catch(() => undefined)
 
     return next(e)

@@ -186,12 +186,13 @@ export const register: Register = on => {
     const vimTerminal = await $.env.get('VIM_TERMINAL')
     const term = await $.env.get('TERM')
     const termProgram = await $.env.get('TERM_PROGRAM')
-    const kittyOrGhostty =
+    const imageTerminal =
       term === 'xterm-kitty' ||
       term === 'xterm-ghostty' ||
       termProgram === 'kitty' ||
-      termProgram === 'ghostty'
-    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined && kittyOrGhostty
+      termProgram === 'ghostty' ||
+      termProgram === 'herdr'
+    hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined && imageTerminal
     epoch += 1
     const mine = epoch
     imageReady = false
