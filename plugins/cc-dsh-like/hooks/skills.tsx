@@ -6,7 +6,7 @@
  */
 import type { ClientModule } from 'claude-code'
 
-export type SkillsProps = {
+type SkillsProps = {
   skills: readonly string[]
   width: number
 }

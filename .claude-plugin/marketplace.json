@@ -1,6 +1,6 @@
 {
   "name": "cc-skin-pro",
-  "description": "A complete Claude Code setup in one marketplace: the dsh-TUI start page, skins and UI polish, and the plugins around them — file tree, model picker, context meter, prompt queue, bookmarks, test results, smart compaction and a mod store.",
+  "description": "A complete Claude Code setup in one marketplace: the dsh-TUI start page, skins and UI polish, and the plugins around them — file tree, context meter, prompt queue, bookmarks, test results, smart compaction and a mod store.",
   "owner": {
     "name": "Linxuan"
   },
@@ -8,12 +8,7 @@
     {
       "name": "cc-band-pro",
       "source": "./plugins/cc-band-pro",
-      "description": "cc-skin-pro's powerline bar alone, locked to Catppuccin Mocha: thinking, model, diff, tree, marks and usage, each block opening its own plugin's pane at once, mid-turn, with no line left in the conversation."
-    },
-    {
-      "name": "find-model",
-      "source": "./plugins/find-model",
-      "description": "A sidebar model picker: the same list as /model, with search and an effort row."
+      "description": "cc-skin-pro's powerline bar alone, locked to Catppuccin Mocha: thinking, usage, diff, tree, marks and pi, each block opening its own plugin's pane at once, mid-turn, with no line left in the conversation."
     },
     {
       "name": "filetree",

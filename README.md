@@ -6,7 +6,7 @@
 
 A hand-picked Claude Code marketplace: the **skins** engine, the **cc-band-pro**
 powerline band, and the panes and tools that make them useful — a start page, a file
-tree, a model picker, context and usage, a prompt queue, bookmarks, test results,
+tree, context and usage, a prompt queue, bookmarks, test results,
 and a mod store.
 
 Some of these plugins are original to this marketplace, some are forks of community
@@ -17,7 +17,7 @@ before skins so the skin's row hooks cannot swallow their output; the band decla
 companions), and their panes are kept from fighting over the same slot. Each one is
 tracked against its upstream release so updates are deliberate rather than accidental.
 
-**Original here:** cc-band-pro, find-model, cc-dsh-like, sidebar-clear.
+**Original here:** cc-band-pro, cc-dsh-like, sidebar-clear.
 **Local forks:** filetree, session-meter, after, transcript-bookmarks, paste-preview.
 **hellosverre's suite:** skins, redgreen, mod-store.
 
@@ -46,14 +46,14 @@ Upstream: [hellosverre/claude-skins](https://github.com/hellosverre/claude-skins
 ![cc-band-pro while Claude works](docs/cc-band-pro-runing.png)
 
 The powerline band above the prompt, locked to Catppuccin Mocha. Six blocks — thinking
-(the crab's picture where the terminal draws images, the Claude glyph elsewhere), model,
-diff count, tree, bookmarks and context usage. Each block opens its plugin's pane at
-once, mid-turn, without leaving a line in the conversation. The band is thin by design:
-the panes belong to find-model, filetree, session-meter, after and transcript-bookmarks,
-which it declares as dependencies. A press calls a tiny `open()` bridge each companion
-exposes, so the pane is opened by its own plugin — instant and correctly drawn,
-sidestepping the cross-plugin blank-pane regression (anthropics/claude-code#110615) —
-rather than a queued slash command.
+(the spinner), the context meter, the diff count (its own replay pane), the file tree,
+bookmarks and pi. Each block opens its plugin's pane at once, mid-turn, without leaving
+a line in the conversation. The band is thin by design: the panes belong to filetree,
+session-meter, after, transcript-bookmarks and cc-pi-team. A press calls a tiny `open()`
+bridge each companion exposes, so the pane is opened by its own plugin — instant and
+correctly drawn, sidestepping the cross-plugin blank-pane regression
+(anthropics/claude-code#110615) — rather than a queued slash command. Narrow terminals
+drop detail rather than blocks: first the token count, then the meter.
 
 By [Linxuan](https://github.com/linxuan-sys). Original to this marketplace.
 
@@ -104,17 +104,7 @@ keeps the pane closed by default; `/filetree` opens it.
 
 Fork of [data-goblin/claude-code-filetree](https://github.com/data-goblin/claude-code-filetree) (MIT).
 
-## 7. find-model
-
-![find-model](docs/find-model.png)
-
-A sidebar model picker: `/find-model` opens the same list `/model` shows, read from the
-merged settings, with search by id, label or name and click, Enter or `j`/`k` to switch.
-Under the list sit the effort levels, and picking one runs `/effort` for the session.
-
-By [Linxuan](https://github.com/linxuan-sys). Original to this marketplace.
-
-## 8. session-meter
+## 7. session-meter
 
 ![session-meter](docs/session-meter.png)
 
@@ -125,7 +115,7 @@ history. Here `autoOpen` defaults to off; `/ctx` opens the pane.
 
 Fork of [arasovic/claude-code-mods — session-meter](https://github.com/arasovic/claude-code-mods/tree/main/session-meter) (MIT).
 
-## 9. after
+## 8. after
 
 ![after](docs/after.png)
 
@@ -136,7 +126,7 @@ processes — the mod runs inside Claude Code.
 
 Fork of [midudev/better-claude](https://github.com/midudev/better-claude) (MIT).
 
-## 10. transcript-bookmarks
+## 9. transcript-bookmarks
 
 ![transcript-bookmarks](docs/transcript-bookmarks.png)
 
@@ -148,7 +138,7 @@ loads before the skin's row hooks.
 
 Fork of [arcadeJHS/claude-code-mods — transcript-bookmarks](https://github.com/arcadeJHS/claude-code-mods/tree/main/transcript-bookmarks) (WTFPL).
 
-## 11. redgreen
+## 10. redgreen
 
 ![redgreen](docs/redgreen.png)
 
@@ -159,7 +149,7 @@ run only updates the status line, so the pane stays out of the way.
 
 Upstream: [hellosverre/redgreen](https://github.com/hellosverre/redgreen) (MIT).
 
-## 12. mod-store
+## 11. mod-store
 
 ![mod-store](docs/mod-store.png)
 
@@ -186,7 +176,6 @@ claude plugin install cc-dsh-like@cc-skin-pro
 claude plugin install sidebar-clear@cc-skin-pro
 claude plugin install paste-preview@cc-skin-pro
 claude plugin install filetree@cc-skin-pro
-claude plugin install find-model@cc-skin-pro
 claude plugin install session-meter@cc-skin-pro
 claude plugin install after@cc-skin-pro
 claude plugin install transcript-bookmarks@cc-skin-pro
@@ -219,11 +208,11 @@ Each plugin keeps the license its upstream gave it: MIT, except transcript-bookm
 
 # 中文说明
 
-一个精挑细选的 Claude Code 插件商店：**skins** 皮肤引擎、**cc-band-pro** powerline 横幅，以及让它们好用的那些面板和工具——起始页、文件树、模型选择器、上下文与用量、提示词队列、书签、测试结果和 mod 商店。
+一个精挑细选的 Claude Code 插件商店：**skins** 皮肤引擎、**cc-band-pro** powerline 横幅，以及让它们好用的那些面板和工具——起始页、文件树、上下文与用量、提示词队列、书签、测试结果和 mod 商店。
 
 这里的插件有的由本站原创，有的是社区插件的 fork，其余是 hellosverre 的套件。收进同一个商店，装齐就是一套完整环境。fork 不是换个皮：依赖 ID 都指向这个商店，加载顺序已经解决（transcript-bookmarks 和 paste-preview 排在 skins 前面，避免被皮肤的整行钩子吞掉；band 把它的伙伴声明为依赖），面板之间不会抢同一个位置；每个都对照上游版本跟踪，更新是有意为之，不会悄悄漂移。
 
-**本站原创：** cc-band-pro、find-model、cc-dsh-like、sidebar-clear。
+**本站原创：** cc-band-pro、cc-dsh-like、sidebar-clear。
 **本地 fork：** filetree、session-meter、after、transcript-bookmarks、paste-preview。
 **hellosverre 套件：** skins、redgreen、mod-store。
 
@@ -242,7 +231,7 @@ Each plugin keeps the license its upstream gave it: MIT, except transcript-bookm
 ![cc-band-pro](docs/cc-band-pro-idle.png)
 ![cc-band-pro 运行中](docs/cc-band-pro-runing.png)
 
-输入框上方的 powerline 横幅，锁定 Catppuccin Mocha。六个块——思考（终端支持图片时是螃蟹，否则是 Claude 图标）、模型、diff 数量、文件树、书签和上下文用量。每个块点一下就会在回合中立刻打开对应插件的面板，不往对话里留一行字。横幅本身很薄：面板属于 find-model、filetree、session-meter、after 和 transcript-bookmarks，它们被声明为依赖。点击调用每个伙伴暴露的一个小 `open()` 桥，由面板自己的插件打开——立刻且渲染正确，绕开跨插件开面板空白的回归（anthropics/claude-code#110615）——而不是排队的斜杠命令。
+输入框上方的 powerline 横幅，锁定 Catppuccin Mocha。六个块——思考（spinner）、上下文用量、diff 数量（自带 replay 面板）、文件树、书签和 pi。每个块点一下就会在回合中立刻打开对应插件的面板，不往对话里留一行字。横幅本身很薄：面板属于 filetree、session-meter、after、transcript-bookmarks 和 cc-pi-team。点击调用每个伙伴暴露的一个小 `open()` 桥，由面板自己的插件打开——立刻且渲染正确，绕开跨插件开面板空白的回归（anthropics/claude-code#110615）——而不是排队的斜杠命令。窄终端只降级细节、不丢块：先去掉 token 数，再去掉进度条。
 
 作者：[Linxuan](https://github.com/linxuan-sys)。本站原创。
 
@@ -278,15 +267,7 @@ fork 自 [alan890104/claude-code-paste-preview](https://github.com/alan890104/cl
 
 fork 自 [data-goblin/claude-code-filetree](https://github.com/data-goblin/claude-code-filetree)（MIT）。
 
-## 7. find-model
-
-![find-model](docs/find-model.png)
-
-侧栏模型选择器：`/find-model` 打开和 `/model` 相同的列表（读自合并后的设置），可按 id、label 或名称搜索，点击、Enter 或 `j`/`k` 切换。列表下方是 effort 等级，选中即对当前会话执行 `/effort`。
-
-作者：[Linxuan](https://github.com/linxuan-sys)。本站原创。
-
-## 8. session-meter
+## 7. session-meter
 
 ![session-meter](docs/session-meter.png)
 
@@ -294,7 +275,7 @@ fork 自 [data-goblin/claude-code-filetree](https://github.com/data-goblin/claud
 
 fork 自 [arasovic/claude-code-mods — session-meter](https://github.com/arasovic/claude-code-mods/tree/main/session-meter)（MIT）。
 
-## 9. after
+## 8. after
 
 ![after](docs/after.png)
 
@@ -302,7 +283,7 @@ fork 自 [arasovic/claude-code-mods — session-meter](https://github.com/arasov
 
 fork 自 [midudev/better-claude](https://github.com/midudev/better-claude)（MIT）。
 
-## 10. transcript-bookmarks
+## 9. transcript-bookmarks
 
 ![transcript-bookmarks](docs/transcript-bookmarks.png)
 
@@ -310,7 +291,7 @@ fork 自 [midudev/better-claude](https://github.com/midudev/better-claude)（MIT
 
 fork 自 [arcadeJHS/claude-code-mods — transcript-bookmarks](https://github.com/arcadeJHS/claude-code-mods/tree/main/transcript-bookmarks)（WTFPL）。
 
-## 11. redgreen
+## 10. redgreen
 
 ![redgreen](docs/redgreen.png)
 
@@ -318,7 +299,7 @@ Claude 跑测试时，失败会落到对话旁边的面板里：失败测试的�
 
 上游：[hellosverre/redgreen](https://github.com/hellosverre/redgreen)（MIT）。
 
-## 12. mod-store
+## 11. mod-store
 
 ![mod-store](docs/mod-store.png)
 
@@ -343,7 +324,6 @@ claude plugin install cc-dsh-like@cc-skin-pro
 claude plugin install sidebar-clear@cc-skin-pro
 claude plugin install paste-preview@cc-skin-pro
 claude plugin install filetree@cc-skin-pro
-claude plugin install find-model@cc-skin-pro
 claude plugin install session-meter@cc-skin-pro
 claude plugin install after@cc-skin-pro
 claude plugin install transcript-bookmarks@cc-skin-pro

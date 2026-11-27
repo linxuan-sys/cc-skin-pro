@@ -16,7 +16,7 @@ const COLORS = {
 }
 
 /** The tools whose calls are recorded, and how much diff is worth computing. */
-const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit'])
+const EDIT_TOOLS = new Set(['Edit', 'Write'])
 const MAX_LCS_LINES = 400
 /** How many steps the strip at the top lists before it says how many more. */
 const MAX_STRIP = 20
@@ -93,12 +93,12 @@ const countChanges = (diff: readonly DiffLine[]) => {
   return { add, del }
 }
 
-export type DiffView = {
+type DiffView = {
   steps: readonly DiffStep[]
   index: number
 }
 
-export type DiffActions = {
+type DiffActions = {
   go: (index: number) => void
   close: () => void
 }
@@ -110,7 +110,7 @@ export type DiffActions = {
 export const drawDiff = ({ Box, Text, Button }: Elements, view: DiffView, act: DiffActions) => {
   const { steps } = view
 
-  if (steps.length === 0 || Button === undefined) {
+  if (steps.length === 0) {
     return (
       <Box flexDirection="column" borderStyle="round" borderColor={COLORS.frame} paddingX={1}>
         <Text key="title" bold color={COLORS.frame}>
@@ -120,7 +120,7 @@ export const drawDiff = ({ Box, Text, Button }: Elements, view: DiffView, act: D
           {'No edits in the last turn yet.'}
         </Text>
         <Text key="hint" color={COLORS.muted}>
-          {'Every Edit, MultiEdit and Write of a turn is kept here; the diff block counts them.'}
+          {'Every Edit and Write of a turn is kept here; the diff block counts them.'}
         </Text>
       </Box>
     )

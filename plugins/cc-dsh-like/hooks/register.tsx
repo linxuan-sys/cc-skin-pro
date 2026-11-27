@@ -167,6 +167,9 @@ const colorRow = (row: string, width: number, from: string, to: string): Run[] =
 
 let normalFile: string | undefined
 let cuteFile: string | undefined
+// herdr's desktop terminal draws kitty images sent inline but not by file path.
+let normalPng: string | undefined
+let cutePng: string | undefined
 let isCute = false
 let skillNames: readonly string[] = []
 /** False until the reveal: the row shows Clawd until then. */
@@ -190,14 +193,15 @@ export const register: Register = on => {
       term === 'xterm-kitty' ||
       term === 'xterm-ghostty' ||
       termProgram === 'kitty' ||
-      termProgram === 'ghostty' ||
-      termProgram === 'herdr'
+      termProgram === 'ghostty'
     hasGraphics = tmux === undefined && nvim === undefined && vimTerminal === undefined && imageTerminal
     epoch += 1
     const mine = epoch
     imageReady = false
     clawdBlink = false
     isCute = false
+    normalPng = undefined
+    cutePng = undefined
     // Blink and the reveal are one causal chain: the last blink's end callback grows
     // the reveal, so whenever the eyes blinked the picture must follow.
     const reveal = (): void => {
@@ -231,6 +235,23 @@ export const register: Register = on => {
     }
     if (normalFile === undefined) {
       $.ui.log('cc-dsh-like: assets/claude-girl.png not found', { to: 'debug' })
+    }
+    // Herdr's desktop terminal draws kitty images sent inline but not by file path;
+    // send the bytes there instead.
+    if (normalFile !== undefined && cuteFile !== undefined && (await $.env.get('HC_TERMINAL_SOCKET')) !== undefined) {
+      const readPng = (path: string): Promise<string> =>
+        $.fs.read(path, { as: 'bytes' }).then(file => file.base64)
+      const [normal, cute] = await Promise.all([
+        readPng(normalFile).catch(() => undefined),
+        readPng(cuteFile).catch(() => undefined)
+      ])
+      if (normal !== undefined && cute !== undefined) {
+        normalPng = normal
+        cutePng = cute
+      } else {
+        // No inline copy and no file-path picture: Clawd is the honest fallback.
+        hasGraphics = false
+      }
     }
 
     const started = await next(e)
@@ -275,8 +296,8 @@ export const register: Register = on => {
     if (e.surface !== 'terminal') return next(e)
 
     const { Box, Client, Image, Text } = $.ui.resolve(e)
-    // A replay after a view switch runs without the session.start state (no paths).
-    // Bail then: drawing Clawd here would overwrite the engine's image slot with text.
+    // No path to draw: a fresh process that has not run session.start yet, or a start
+    // that found no assets. Bail — a text Clawd here would overwrite the engine's image slot.
     if (normalFile === undefined || cuteFile === undefined) return next(e)
     const columns0 = e.viewport?.columns ?? FALLBACK_COLUMNS
     const rows0 = e.viewport?.rows ?? FALLBACK_ROWS
@@ -295,7 +316,11 @@ export const register: Register = on => {
         <Box key="claude-girl-stack" width={columns} height={rows}>
           <Image
             key="claude-girl"
-            source={{ file: isCute ? cuteFile as string : normalFile as string, format: 'png' }}
+            source={
+              normalPng !== undefined && cutePng !== undefined
+                ? { png: isCute ? cutePng : normalPng }
+                : { file: isCute ? cuteFile as string : normalFile as string, format: 'png' }
+            }
             columns={columns}
             rows={rows}
             alt=" "

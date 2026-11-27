@@ -6,42 +6,16 @@ import { FRAME_MS, drawPowerline, fitPills } from './bar'
 import type { BarPress } from './bar'
 import { DIFF_PANE, diffLines, drawDiff, isEditTool } from './diff'
 
-const NO_USAGE: Usage = { model: null, contextPercent: null, contextTokens: null }
+const NO_USAGE: Usage = { contextPercent: null, contextTokens: null }
 
 const frameAtom = atom({ plugin: 'cc-band-pro', key: 'frame' } as const, 0)
 const usageAtom = atom({ plugin: 'cc-band-pro', key: 'usage' } as const, NO_USAGE)
-const effortAtom = atom({ plugin: 'cc-band-pro', key: 'effort' } as const, null as string | null)
 const diffStepsAtom = atom({ plugin: 'cc-band-pro', key: 'diffSteps' } as const, [] as DiffStep[])
 const diffIndexAtom = atom({ plugin: 'cc-band-pro', key: 'diffIndex' } as const, 0)
 
-/** The thinking block's two crab thumbnails, read once per load; undefined when an asset is missing. */
-let crabPngs: { idle: string; typing: string } | null = null
-/** Set once a read came up empty, so a missing asset is not read again every frame. */
-let crabMissing = false
-const readCrab = async ($: EngineInterface): Promise<{ idle: string; typing: string } | undefined> => {
-  if (crabPngs !== null) {
-    return crabPngs
-  }
-  if (crabMissing) {
-    return undefined
-  }
-  const read = (name: string): Promise<string> =>
-    $.fs.read(`${$.plugin.root}/assets/${name}`, { as: 'bytes' }).then(file => file.base64)
-  const [idle, typing] = await Promise.all([read('crab.png').catch(() => ''), read('crab-typing.png').catch(() => '')])
-  if (idle === '' || typing === '') {
-    crabMissing = true
-    return undefined
-  }
-
-  crabPngs = { idle, typing }
-
-  return crabPngs
-}
-
-/** `hasGraphics` keeps the band visible; `imageCapable` is the kitty/Ghostty/Herdr gate for the crab. */
-let hasGraphics = true
-let imageCapable = false
-let bandOn: boolean | undefined
+/** Whether the band is shown; `/band off` hides it and the choice survives sessions. */
+const BAND_ON_KEY = 'band-on'
+let bandOn = true
 
 /**
  * The command each block runs; the diff block opens this plugin's own replay
@@ -49,59 +23,15 @@ let bandOn: boolean | undefined
  */
 const TARGETS: Readonly<Record<Exclude<BarPress, 'diff' | 'pi'>, string>> = {
   after: 'after',
-  model: 'find-model',
   tree: 'filetree',
   mark: 'bookmarks',
   usage: 'ctx',
 }
 
-/** The friendly names the settings' modelPicker gives the models, read as a session starts. */
-let labels: Record<string, string> = {}
 /** Moves the spinner while a main-thread turn runs. */
 let animation: Timer | undefined
 /** The edits this turn has made so far; they become the diff pane's steps when it ends. */
 let pendingDiffs: DiffStep[] = []
-
-/** The session's model; null when it cannot be read. */
-const readModel = async ($: EngineInterface): Promise<string | null> => {
-  try {
-    return await $.session.model()
-  } catch {
-    return null
-  }
-}
-
-/** The effort `/effort` set, from the config rows; null for none (the model's own default). */
-const readEffort = async ($: EngineInterface): Promise<string | null> => {
-  try {
-    const row = (await $.config.list()).find(one => one.key === 'effort')
-    const value = typeof row?.value === 'string' ? row.value.trim() : ''
-
-    return value === '' || value === 'auto' ? null : value
-  } catch {
-    return null
-  }
-}
-
-/** The friendly name of each model the settings' modelPicker lists, where it gives one. */
-const readLabels = async ($: EngineInterface): Promise<Record<string, string>> => {
-  try {
-    const picker = (await $.settings.read({ key: 'modelPicker' })) as { options?: unknown } | undefined
-    const rows = Array.isArray(picker?.options) ? (picker.options as Array<{ model?: unknown; label?: unknown } | null>) : []
-    const found: Record<string, string> = {}
-    for (const row of rows) {
-      const model = typeof row?.model === 'string' ? row.model.trim() : ''
-      const label = typeof row?.label === 'string' ? row.label.trim() : ''
-      if (model !== '' && label !== '') {
-        found[model] = label
-      }
-    }
-
-    return found
-  } catch {
-    return {}
-  }
-}
 
 /**
  * How full the context is, measured as skins and `/context` measure it: against
@@ -119,7 +49,7 @@ const contextPercent = (context: SessionContextUsage): number | null => {
 }
 
 /** How full the context is; absent when the session cannot say. `session.measure`'s own context carries no breakdown. */
-const readUsage = async ($: EngineInterface): Promise<Omit<Usage, 'model'> | undefined> => {
+const readUsage = async ($: EngineInterface): Promise<Usage | undefined> => {
   const maybe = await $.session.usage({ breakdown: 'summary' }).catch(() => undefined)
   if (maybe === undefined) {
     return undefined
@@ -128,16 +58,10 @@ const readUsage = async ($: EngineInterface): Promise<Omit<Usage, 'model'> | und
   return { contextPercent: contextPercent(maybe.context), contextTokens: maybe.context.tokens ?? null }
 }
 
-/** Reads in what the bar shows: the model's names first, so the redraw the writes cause has them. */
+/** Reads in what the bar shows: how full the context is. */
 const setUp = async ($: EngineInterface) => {
-  labels = await readLabels($)
-  const model = await readModel($)
   const usage = await readUsage($)
-  await update($, usageAtom, current => ({ ...current, ...usage, model: model ?? current.model }))
-  const effort = await readEffort($)
-  if (effort !== null) {
-    await update($, effortAtom, () => effort)
-  }
+  await update($, usageAtom, current => ({ ...current, ...usage }))
 }
 
 /** Windows Terminal and Herdr keep the session busy, so a plugin-run command queues forever there; fill it for Enter instead. */
@@ -168,10 +92,6 @@ const openDiff = async ($: EngineInterface): Promise<void> => {
  * whose session never idles the command is filled for Enter, otherwise the
  * target's bridge opens it now.
  */
-const onBarPress = ($: EngineInterface, press: BarPress) => {
-  void pressBar($, press).catch(() => undefined)
-}
-
 const pressBar = async ($: EngineInterface, press: BarPress): Promise<void> => {
   if (press === 'diff') {
     await openDiff($)
@@ -195,8 +115,6 @@ const pressBar = async ($: EngineInterface, press: BarPress): Promise<void> => {
   try {
     if (press === 'after') {
       await $.after.open()
-    } else if (press === 'model') {
-      await $.findModel.open()
     } else if (press === 'tree') {
       await $.filetree.open()
     } else if (press === 'mark') {
@@ -220,9 +138,9 @@ const relPath = (cwd: string, path: unknown): string => {
 }
 
 /**
- * The steps a tool call makes: one for an Edit or a Write, one per edit of a
- * MultiEdit. A Write reads the file as it stands before the tool runs, so it
- * diffs against what was there.
+ * The steps a tool call makes: one for an Edit, one for a Write. A Write reads
+ * the file as it stands before the tool runs, so it diffs against what was
+ * there.
  */
 const stepsFor = async ($: EngineInterface, e: Record<string, unknown>): Promise<DiffStep[]> => {
   const cwd = await $.session.cwd().catch(() => '')
@@ -230,16 +148,6 @@ const stepsFor = async ($: EngineInterface, e: Record<string, unknown>): Promise
 
   if (e.tool === 'Edit') {
     return [{ tool: 'Edit', file, diff: diffLines(e.old_string, e.new_string), note: e.replace_all === true ? 'replace all' : '' }]
-  }
-  if (e.tool === 'MultiEdit' && Array.isArray(e.edits)) {
-    const edits = e.edits as Array<{ old_string?: unknown; new_string?: unknown } | null>
-
-    return edits.map((edit, k) => ({
-      tool: 'MultiEdit',
-      file,
-      diff: diffLines(edit?.old_string, edit?.new_string),
-      note: `edit ${k + 1} of ${edits.length}`,
-    }))
   }
   if (e.tool === 'Write') {
     let before = ''
@@ -274,32 +182,19 @@ export const register: Register = on => {
       description: 'Open the replay pane',
       immediate: true,
     })
-    const tmux = await $.env.get('TMUX')
-    const nvim = await $.env.get('NVIM')
-    const vimTerminal = await $.env.get('VIM_TERMINAL')
-    const term = await $.env.get('TERM')
-    const termProgram = await $.env.get('TERM_PROGRAM')
-    const editor = nvim !== undefined || vimTerminal !== undefined
-    hasGraphics = !editor && termProgram !== 'herdr'
-    imageCapable =
-      !editor &&
-      tmux === undefined &&
-      (term === 'xterm-kitty' ||
-        term === 'xterm-ghostty' ||
-        termProgram === 'kitty' ||
-        termProgram === 'ghostty' ||
-        termProgram === 'herdr')
+    bandOn = (await $.store.get(BAND_ON_KEY).catch(() => undefined)) !== false
     await setUp($).catch(() => undefined)
 
     return next(e)
   })
 
-  on('command.run', { command: 'band' }, ($, e) => {
+  on('command.run', { command: 'band' }, async ($, e) => {
     const arg = e.args.trim().toLowerCase()
     if (arg !== 'on' && arg !== 'off') {
       return { text: 'Usage: /band on | off' }
     }
     bandOn = arg === 'on'
+    await $.store.set(BAND_ON_KEY, bandOn).catch(() => undefined)
     $.ui.invalidate('ui.render')
     return { text: `band ${arg}` }
   })
@@ -331,26 +226,6 @@ export const register: Register = on => {
 
     return next(e)
   }).catch(($, e, next) => next(e))
-
-  // Each request says which model and effort it ran on: the model block follows them.
-  on('turn.step', async function* ($, e, next) {
-    try {
-      if (e.agentId === undefined) {
-        const effort = typeof e.effort === 'string' ? e.effort : undefined
-        if (effort !== undefined && (await read($, effortAtom)) !== effort) {
-          await update($, effortAtom, () => effort)
-        }
-        const model = e.model
-        if ((await read($, usageAtom)).model !== model) {
-          await update($, usageAtom, usage => ({ ...usage, model }))
-        }
-      }
-    } catch {
-      // The bar shows them from the next request.
-    }
-
-    return yield* next(e)
-  })
 
   // An edit is diffed before it runs (a Write against the file as it stands) and kept once it went through.
   on('tool.call', async ($, e, next) => {
@@ -390,63 +265,41 @@ export const register: Register = on => {
   }).catch(($, e, next) => next(e))
 
   on('session.measure', async ($, e, next) => {
-    const model = await readModel($)
-    const usage = await readUsage($)
-    await update($, usageAtom, current => ({ ...current, ...usage, model: model ?? current.model }))
+    await setUp($)
 
     return next(e)
-  }).catch(($, e, next) => next(e))
-
-  // A /model or a pick in /find-model shows at once, not with the next request.
-  on('config.set', { key: 'model' }, async ($, e, next) => {
-    const result = await next(e)
-    const model = await readModel($)
-    await update($, usageAtom, current => ({ ...current, model: model ?? current.model }))
-
-    return result
-  }).catch(($, e, next) => next(e))
-
-  on('config.set', { key: 'effort' }, async ($, e, next) => {
-    const result = await next(e)
-    const effort = await readEffort($)
-    await update($, effortAtom, () => effort)
-
-    return result
   }).catch(($, e, next) => next(e))
 
   // The band: the bar on top of whatever the plugins beneath draw, so the skins band and the rest stay.
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const below = await next(e)
-    if (e.props.hasSurvey) {
-      return below
-    }
-    if (!(bandOn ?? hasGraphics)) {
-      return below
-    }
-    const elements = $.ui.resolve(e)
-    // The thinking block draws the crab where the surface offers pictures and
-    // no escape-eating host wraps the terminal; elsewhere it keeps the glyph.
-    const crab = imageCapable && 'Image' in elements ? await readCrab($) : undefined
-    const pills = fitPills(
-      {
-        usage: await read($, usageAtom),
-        effort: await read($, effortAtom),
-        labels,
-        diffCount: (await read($, diffStepsAtom)).length,
-        isWorking: e.props.isWorking,
-        frame: await read($, frameAtom),
-      },
-      e.props.bodyColumns,
-      crab,
-    )
-    const { Box } = elements
+    try {
+      if (!bandOn) {
+        return below
+      }
+      const elements = $.ui.resolve(e)
+      const pills = fitPills(
+        {
+          usage: await read($, usageAtom),
+          diffCount: (await read($, diffStepsAtom)).length,
+          isWorking: e.props.isWorking,
+          frame: await read($, frameAtom),
+        },
+        e.props.bodyColumns,
+      )
+      const { Box } = elements
 
-    return (
-      <Box flexDirection="column">
-        {drawPowerline(elements, pills, press => onBarPress($, press))}
-        {below}
-      </Box>
-    )
+      const tree = (
+        <Box flexDirection="column">
+          {drawPowerline(elements, pills, press => void pressBar($, press).catch(() => undefined))}
+          {below}
+        </Box>
+      )
+
+      return tree
+    } catch {
+      return below
+    }
   }).catch(($, e, next) => next(e))
 
   on('ui.render', { component: 'Pane', requestId: DIFF_PANE }, async ($, e) => {

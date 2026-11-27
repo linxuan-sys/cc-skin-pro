@@ -7,7 +7,7 @@
  */
 import type { ClientModule } from 'claude-code'
 
-export type LoveProps = {
+type LoveProps = {
   texts: readonly string[]
   width: number
 }
